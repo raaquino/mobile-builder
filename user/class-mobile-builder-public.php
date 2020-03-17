@@ -17,10 +17,10 @@
  * enqueue the public-facing stylesheet and JavaScript.
  *
  * @package    Mobile_Builder
- * @subpackage Mobile_Builder/public
+ * @subpackage Mobile_Builder/user
  * @author     Ngoc Dang <ngocdt@rnlab.io>
  */
-class Mobile_Builder_Public {
+class Mobile_Builder_User {
 
 	/**
 	 * The ID of this plugin.
