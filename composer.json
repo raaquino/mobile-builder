@@ -3,8 +3,8 @@
     "description": "The most advanced drag & drop app builder. Create multi templates and app controls.",
     "type": "project",
     "require": {
-        "facebook/graph-sdk": "^5.7",
-        "firebase/php-jwt": "^5.1.0"
+        "firebase/php-jwt": "^5.0",
+        "facebook/graph-sdk": "^5.7"
     },
     "license": "GNU",
     "authors": [
