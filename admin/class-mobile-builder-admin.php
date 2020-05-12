@@ -174,8 +174,8 @@ class Mobile_Builder_Admin {
 	 */
 	public function template_configs() {
 		global $wpdb;
-
-		return $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}rnlab_template_mobile", OBJECT );
+		$table_name = $wpdb->prefix . MOBILE_BUILDER_TABLE_NAME;
+		return $wpdb->get_results( "SELECT * FROM $table_name", OBJECT );
 	}
 
 	/**
