@@ -5,11 +5,11 @@
  *
  * This file is used to markup the public-facing aspects of the plugin.
  *
- * @link       https://rnlab.io
+ * @link       http://reactnativelab.com
  * @since      1.0.0
  *
- * @package    Mobile_Builder
- * @subpackage Mobile_Builder/public/partials
+ * @package    Wp_Auth
+ * @subpackage Wp_Auth/public/partials
  */
 ?>
 

@@ -6,8 +6,8 @@
  * @link       https://rnlab.io
  * @since      1.0.0
  *
- * @package    Rnlab_App_Control
- * @subpackage Rnlab_App_Control/product
+ * @package    Mobile_Builder
+ * @subpackage Mobile_Builder/product
  */
 
 /**
@@ -16,11 +16,11 @@
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the product-facing stylesheet and JavaScript.
  *
- * @package    Rnlab_App_Control
- * @subpackage Rnlab_App_Control/product
+ * @package    Mobile_Builder
+ * @subpackage Mobile_Builder/product
  * @author     RNLAB <ngocdt@rnlab.io>
  */
-class Rnlab_App_Control_Product {
+class Mobile_Builder_Product {
 
 	/**
 	 * The ID of this plugin.

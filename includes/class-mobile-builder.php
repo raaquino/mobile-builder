@@ -25,7 +25,7 @@
  * @since      1.0.0
  * @package    Mobile_Builder
  * @subpackage Mobile_Builder/includes
- * @author     Ngoc Dang <ngocdt@rnlab.io>
+ * @author     RNLAB <ngocdt@rnlab.io>
  */
 class Mobile_Builder {
 
@@ -35,7 +35,7 @@ class Mobile_Builder {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      Mobile_Builder_Loader    $loader    Maintains and registers all hooks for the plugin.
+	 * @var      Mobile_Builder_Loader $loader Maintains and registers all hooks for the plugin.
 	 */
 	protected $loader;
 
@@ -44,7 +44,7 @@ class Mobile_Builder {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      string    $plugin_name    The string used to uniquely identify this plugin.
+	 * @var      string $plugin_name The string used to uniquely identify this plugin.
 	 */
 	protected $plugin_name;
 
@@ -53,7 +53,7 @@ class Mobile_Builder {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      string    $version    The current version of the plugin.
+	 * @var      string $version The current version of the plugin.
 	 */
 	protected $version;
 
@@ -67,17 +67,15 @@ class Mobile_Builder {
 	 * @since    1.0.0
 	 */
 	public function __construct() {
-		if ( defined( 'MOBILE_BUILDER_VERSION' ) ) {
-			$this->version = MOBILE_BUILDER_VERSION;
-		} else {
-			$this->version = '1.0.0';
-		}
-		$this->plugin_name = 'mobile-builder';
+		$this->version     = MOBILE_BUILDER_CONTROL_VERSION;
+		$this->plugin_name = MOBILE_BUILDER_PLUGIN_NAME;
 
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
+		$this->define_product_hooks();
+		$this->define_api_hooks();
 
 	}
 
@@ -100,9 +98,14 @@ class Mobile_Builder {
 	private function load_dependencies() {
 
 		/**
+		 * Load function
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'helpers/mobile-builder-functions.php';
+
+		/**
 		 * Load dependency install by composer
 		 */
-//		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php';
 
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
@@ -117,6 +120,14 @@ class Mobile_Builder {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-mobile-builder-i18n.php';
 
 		/**
+		 * The class responsible for loading payment gateways
+		 * @author Ngoc Dang
+		 * @since 1.1.0
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/gateways/class-mobile-builder-gateway-paypal.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/gateways/class-mobile-builder-gateway-razorpay.php';
+
+		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-mobile-builder-admin.php';
@@ -126,6 +137,25 @@ class Mobile_Builder {
 		 * side of the site.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-mobile-builder-public.php';
+
+		/**
+		 * The class responsible for defining all actions that occur in the product-facing
+		 * side of the site.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'product/class-mobile-builder-product.php';
+
+		/**
+		 * The class responsible for defining all actions that occur in the api
+		 * side of the site.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'api/class-mobile-builder-cart.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'api/class-mobile-builder-vendor.php';
+
+		/**
+		 * Load library
+		 * @since 1.2.3
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/libraries/class-mobile-builder-public-key.php';
 
 		$this->loader = new Mobile_Builder_Loader();
 
@@ -159,14 +189,31 @@ class Mobile_Builder {
 
 		$plugin_admin = new Mobile_Builder_Admin( $this->get_plugin_name(), $this->get_version() );
 
-		// Define admin routers
 		$this->loader->add_action( 'rest_api_init', $plugin_admin, 'add_api_routes' );
 
 		// Add the options page and menu item.
-		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_plugin_admin_menu' );
+		add_action( 'admin_menu', array( $plugin_admin, 'add_plugin_admin_menu' ) );
 
 		// Add plugin action link point to settings page
-		$this->loader->add_filter( 'plugin_action_links_' . $this->plugin_name . '/' . $this->plugin_name . '.php', $plugin_admin, 'add_plugin_action_links' );
+		add_filter( 'plugin_action_links_' . $this->plugin_name . '/' . $this->plugin_name . '.php', array(
+			$plugin_admin,
+			'add_plugin_action_links'
+		) );
+
+	}
+
+
+	private function define_api_hooks() {
+
+		// Cart
+		$plugin_cart = new Mobile_Builder_Cart( $this->get_plugin_name(), $this->get_version() );
+		$this->loader->add_action( 'wp_loaded', $plugin_cart, 'rnlab_pre_car_rest_api', 5 );
+		$this->loader->add_action( 'rest_api_init', $plugin_cart, 'add_api_routes', 10 );
+
+		// Vendor
+		$plugin_api = new Mobile_Builder_Vendor( $this->get_plugin_name(), $this->get_version() );
+		$this->loader->add_action( 'rest_api_init', $plugin_api, 'add_api_routes', 10 );
+		$this->loader->add_filter( 'posts_clauses', $plugin_api, 'mbd_product_list_geo_location_filter_post_clauses', 500, 2 );
 
 	}
 
@@ -181,8 +228,93 @@ class Mobile_Builder {
 
 		$plugin_public = new Mobile_Builder_Public( $this->get_plugin_name(), $this->get_version() );
 
+		$rnlab_gateways = array();
+
+		// Payment Gateway via PayPal Standard
+		$gateway_paypal = new Mobile_Builder_Gateway_PayPal();
+		array_push( $rnlab_gateways, $gateway_paypal );
+
+		// Payment Gateway via Razorpay Standard
+		$gateway_razorpay = new Mobile_Builder_Gateway_Razorpay();
+		array_push( $rnlab_gateways, $gateway_razorpay );
+
+		// Register Payment Endpoint for all Gateways
+		foreach ( $rnlab_gateways as &$rnlab_gateway ) {
+			$this->loader->add_filter( 'rnlab_pre_process_' . $rnlab_gateway->gateway_id . '_payment', $rnlab_gateway, 'rnlab_pre_process_payment' );
+		}
+
+		$this->loader->add_action( 'rest_api_init', $plugin_public, 'add_api_routes' );
+		$this->loader->add_filter( 'determine_current_user', $plugin_public, 'determine_current_user' );
+
+		/**
+		 * Fillter locate template
+		 * @since 1.2.0
+		 */
+		$this->loader->add_filter( 'woocommerce_locate_template', $plugin_public, 'woocommerce_locate_template', 100, 3 );
+
+		/**
+		 * Fillter add to cart before redirect to checkout page
+		 * @since 1.2.0
+		 */
+		$this->loader->add_action( 'template_redirect', $plugin_public, 'template_redirect' );
+
+		/**
+		 * Add style for checkout page
+		 * @since 1.2.0
+		 */
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+
+		/**
+		 * Filter token digits
+		 * @since 1.3.3
+		 */
+		$this->loader->add_filter( 'digits_rest_token_data', $plugin_public, 'custom_digits_rest_token_data', 100, 2 );
+
+	}
+
+	/**
+	 * Register all of the hooks related to the public-facing functionality
+	 * of the plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function define_product_hooks() {
+
+		$plugin_product = new Mobile_Builder_Product( $this->get_plugin_name(), $this->get_version() );
+
+		$this->loader->add_action( 'rest_api_init', $plugin_product, 'add_api_routes' );
+
+		// Product variation
+		$this->loader->add_filter( 'woocommerce_rest_prepare_product_variation_object', $plugin_product,
+			'custom_woocommerce_rest_prepare_product_variation_object' );
+
+		$this->loader->add_filter( 'woocommerce_rest_prepare_product_variation_object', $plugin_product,
+			'prepare_product_variation_images', 10, 3 );
+
+		// Product
+		$this->loader->add_filter( 'woocommerce_rest_prepare_product_object', $plugin_product,
+			'custom_change_product_response', 20, 3 );
+
+		// Category
+		$this->loader->add_filter( 'woocommerce_rest_prepare_product_cat', $plugin_product,
+			'custom_change_product_cat', 20, 3 );
+
+		// Blog
+		$this->loader->add_filter( 'the_title', $plugin_product,
+			'custom_the_title', 20, 3 );
+
+		$this->loader->add_filter( 'woocommerce_rest_prepare_product_object', $plugin_product,
+			'prepare_product_images', 30, 3 );
+
+		// Product Attribute
+		$this->loader->add_filter( 'woocommerce_rest_prepare_product_attribute', $plugin_product,
+			'custom_woocommerce_rest_prepare_product_attribute', 10, 3 );
+
+		$this->loader->add_filter( 'woocommerce_rest_prepare_pa_color', $plugin_product, 'add_value_pa_color' );
+		$this->loader->add_filter( 'woocommerce_rest_prepare_pa_image', $plugin_product, 'add_value_pa_image' );
+
+		$this->loader->add_filter( 'wcml_client_currency', $plugin_product, 'mbd_wcml_client_currency' );
 
 	}
 
@@ -199,8 +331,8 @@ class Mobile_Builder {
 	 * The name of the plugin used to uniquely identify it within the context of
 	 * WordPress and to define internationalization functionality.
 	 *
-	 * @since     1.0.0
 	 * @return    string    The name of the plugin.
+	 * @since     1.0.0
 	 */
 	public function get_plugin_name() {
 		return $this->plugin_name;
@@ -209,8 +341,8 @@ class Mobile_Builder {
 	/**
 	 * The reference to the class that orchestrates the hooks with the plugin.
 	 *
-	 * @since     1.0.0
 	 * @return    Mobile_Builder_Loader    Orchestrates the hooks of the plugin.
+	 * @since     1.0.0
 	 */
 	public function get_loader() {
 		return $this->loader;
@@ -219,8 +351,8 @@ class Mobile_Builder {
 	/**
 	 * Retrieve the version number of the plugin.
 	 *
-	 * @since     1.0.0
 	 * @return    string    The version number of the plugin.
+	 * @since     1.0.0
 	 */
 	public function get_version() {
 		return $this->version;

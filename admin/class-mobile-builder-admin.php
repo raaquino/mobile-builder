@@ -3,22 +3,12 @@
 /**
  * The admin-specific functionality of the plugin.
  *
- * @link       https://rnlab.io
- * @since      1.0.0
- *
- * @package    Mobile_Builder
- * @subpackage Mobile_Builder/admin
- */
-
-/**
- * The admin-specific functionality of the plugin.
- *
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
  *
  * @package    Mobile_Builder
  * @subpackage Mobile_Builder/admin
- * @author     Ngoc Dang <ngocdt@rnlab.io>
+ * @author     RNLAB <ngocdt@rnlab.io>
  */
 class Mobile_Builder_Admin {
 
@@ -27,7 +17,7 @@ class Mobile_Builder_Admin {
 	 *
 	 * @since    1.0.0
 	 * @access   private
-	 * @var      string $plugin_name The ID of this plugin.
+	 * @var      string    $plugin_name    The ID of this plugin.
 	 */
 	private $plugin_name;
 
@@ -36,43 +26,22 @@ class Mobile_Builder_Admin {
 	 *
 	 * @since    1.0.0
 	 * @access   private
-	 * @var      string $version The current version of this plugin.
+	 * @var      string    $version    The current version of this plugin.
 	 */
 	private $version;
 
 	/**
-	 * The table name save in database.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string $table_name The table name save in database.
-	 */
-	private $table_name;
-
-	/**
-	 * The api endpoint.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string $namespace The api endpoint.
-	 */
-	private $namespace;
-
-	/**
 	 * Initialize the class and set its properties.
 	 *
-	 * @param string $plugin_name The name of this plugin.
-	 * @param string $version The version of this plugin.
-	 *
 	 * @since    1.0.0
+	 * @param      string    $plugin_name       The name of this plugin.
+	 * @param      string    $version    The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version ) {
-		global $wpdb;
 
 		$this->plugin_name = $plugin_name;
-		$this->version     = $version;
-		$this->table_name  = $wpdb->prefix . "mobile_builder_templates";
-		$this->namespace   = $plugin_name . '/v' . intval( $version );
+		$this->version = $version;
+
 	}
 
 	/**
@@ -81,7 +50,22 @@ class Mobile_Builder_Admin {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-		wp_enqueue_style( $this->plugin_name, 'https://cdnjs.rnlab.io/' . MOBILE_BUILDER_JS_VERSION . '/static/css/main.css', array(), MOBILE_BUILDER_JS_VERSION, 'all' );
+
+		/**
+		 * This function is provided for demonstration purposes only.
+		 *
+		 * An instance of this class should be passed to the run() function
+		 * defined in Mobile_Builder_Loader as all of the hooks are defined
+		 * in that particular class.
+		 *
+		 * The Mobile_Builder_Loader will then create the relationship
+		 * between the defined hooks and the functions defined in this
+		 * class.
+		 */
+
+		wp_enqueue_style( $this->plugin_name, 'https://cdnjs.rnlab.io/'. $this->version .'/static/css/main.css', array(), $this->version,
+			'all' );
+
 	}
 
 	/**
@@ -90,16 +74,31 @@ class Mobile_Builder_Admin {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
+
+		/**
+		 * This function is provided for demonstration purposes only.
+		 *
+		 * An instance of this class should be passed to the run() function
+		 * defined in Wp_Auth_Loader as all of the hooks are defined
+		 * in that particular class.
+		 *
+		 * The Wp_Auth_Loader will then create the relationship
+		 * between the defined hooks and the functions defined in this
+		 * class.
+		 */
+
+		$namespace = $this->plugin_name . '/v' . intval( $this->version );
+
 		wp_enqueue_media();
-		wp_enqueue_script( $this->plugin_name, 'https://cdnjs.rnlab.io/' . MOBILE_BUILDER_JS_VERSION . '/static/js/main.js', array(
-			'jquery',
-			'media-upload'
-		), MOBILE_BUILDER_JS_VERSION, true );
+
+		wp_enqueue_script( $this->plugin_name, 'https://cdnjs.rnlab.io/'. $this->version .'/static/js/main.js', array('jquery', 'media-upload'), $this->version, true );
+
 		wp_localize_script( $this->plugin_name, 'wp_rnlab_configs', array(
 				'api_nonce' => wp_create_nonce( 'wp_rest' ),
 				'api_url'   => rest_url( '' ),
 			)
 		);
+
 	}
 
 	/**
@@ -108,50 +107,66 @@ class Mobile_Builder_Admin {
 	 * @since 1.0.0
 	 */
 	public function add_api_routes() {
-		$templates_endpoint = 'templates';
+		$namespace = $this->plugin_name . '/v' . intval( $this->version );
+		$endpoint = 'template-mobile';
+		$endpoint_configs = 'configs';
 
-		register_rest_route( $this->namespace, $templates_endpoint, array(
+		register_rest_route( $namespace, $endpoint, array(
 			array(
-				'methods'  => \WP_REST_Server::READABLE,
-				'callback' => array( $this, 'get_templates' ),
+				'methods'               => \WP_REST_Server::READABLE,
+				'callback'              => array( $this, 'get_template_config' ),
+				// 'permission_callback'   => array( $this, 'admin_permissions_check' ),
 			),
 		) );
 
-		register_rest_route( $this->namespace, $templates_endpoint, array(
+		register_rest_route( $namespace, $endpoint, array(
 			array(
-				'methods'             => \WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'add_templates' ),
-				'permission_callback' => array( $this, 'admin_permissions_check' ),
-				'args'                => array(),
+				'methods'               => \WP_REST_Server::CREATABLE,
+				'callback'              => array( $this, 'add_template_config' ),
+				'permission_callback'   => array( $this, 'admin_permissions_check' ),
+				'args'                  => array(),
 			),
 		) );
 
-		register_rest_route( $this->namespace, $templates_endpoint, array(
+		register_rest_route( $namespace, $endpoint, array(
 			array(
-				'methods'             => \WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_templates' ),
-				'permission_callback' => array( $this, 'admin_permissions_check' ),
-				'args'                => array(),
+				'methods'               => \WP_REST_Server::EDITABLE,
+				'callback'              => array( $this, 'update_template_config' ),
+				'permission_callback'   => array( $this, 'admin_permissions_check' ),
+				'args'                  => array(),
 			),
 		) );
 
-		register_rest_route( $this->namespace, $templates_endpoint, array(
+		register_rest_route( $namespace, $endpoint, array(
 			array(
-				'methods'             => \WP_REST_Server::DELETABLE,
-				'callback'            => array( $this, 'delete_templates' ),
-				'permission_callback' => array( $this, 'admin_permissions_check' ),
-				'args'                => array(),
+				'methods'               => \WP_REST_Server::DELETABLE,
+				'callback'              => array( $this, 'delete_template_config' ),
+				'permission_callback'   => array( $this, 'admin_permissions_check' ),
+				'args'                  => array(),
 			),
 		) );
+
+		register_rest_route( $namespace, $endpoint_configs, array(
+			array(
+				'methods'               => \WP_REST_Server::READABLE,
+				'callback'              => array( $this, 'get_configs' ),
+			),
+		) );
+
+		register_rest_route( $namespace, $endpoint_configs, array(
+			array(
+				'methods'               => \WP_REST_Server::CREATABLE,
+				'callback'              => array( $this, 'update_configs' ),
+				'permission_callback'   => array( $this, 'admin_permissions_check' ),
+				'args'                  => array(),
+			),
+		) );
+
 	}
 
-	/**
-	 * @param $request
-	 *
-	 * @return mixed
-	 */
-	public function admin_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+	public function template_configs() {
+		global $wpdb;
+		return $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}rnlab_template_mobile", OBJECT );
 	}
 
 	/**
@@ -159,11 +174,8 @@ class Mobile_Builder_Admin {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function get_templates( $request ) {
-		global $wpdb;
-		$results = $wpdb->get_results( "SELECT * FROM {$this->table_name}", OBJECT );
-
-		return new WP_REST_Response( $results, 200 );
+	public function get_template_config( $request ) {
+		return new WP_REST_Response( $this->template_configs(), 200 );
 	}
 
 	/**
@@ -171,12 +183,14 @@ class Mobile_Builder_Admin {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function add_templates( $request ) {
+	public function add_template_config( $request ) {
 		global $wpdb;
+		$table_name = $wpdb->prefix . "rnlab_template_mobile";
 
-		$data    = $request->get_param( 'data' );
+		$data = $request->get_param( 'data' );
+
 		$results = $wpdb->insert(
-			$this->table_name,
+			$table_name,
 			$data
 		);
 
@@ -188,14 +202,15 @@ class Mobile_Builder_Admin {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function update_templates( $request ) {
+	public function update_template_config( $request ) {
 		global $wpdb;
+		$table_name = $wpdb->prefix . "rnlab_template_mobile";
 
-		$data  = $request->get_param( 'data' );
+		$data = $request->get_param( 'data' );
 		$where = $request->get_param( 'where' );
 
 		$results = $wpdb->update(
-			$this->table_name,
+			$table_name,
 			$data,
 			$where
 		);
@@ -208,16 +223,62 @@ class Mobile_Builder_Admin {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function delete_templates( $request ) {
+	public function delete_template_config( $request ) {
 		global $wpdb;
+		$table_name = $wpdb->prefix . "rnlab_template_mobile";
 
-		$where   = $request->get_param( 'where' );
+		$where = $request->get_param( 'where' );
+
 		$results = $wpdb->delete(
-			$this->table_name,
+			$table_name,
 			$where
 		);
 
 		return new WP_REST_Response( $results, 200 );
+	}
+
+	/**
+	 * @param $request
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_configs( $request ) {
+		
+		$configs = get_option('rnlab_configs', array(
+			"requireLogin" => false,
+			"toggleSidebar" => false,
+			"isBeforeNewProduct" => 5
+		));
+
+		return new WP_REST_Response( maybe_unserialize($configs), 200 );
+	}
+
+	/**
+	 * @param $request
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function update_configs( $request ) {
+
+		$data = $request->get_param( 'data' );
+		$status = false;
+
+		if ( get_option('rnlab_configs') ) {
+			$status = update_option('rnlab_configs', maybe_serialize($data));
+		} else {
+			$status = add_option('rnlab_configs', maybe_serialize($data));
+		}
+
+		return new WP_REST_Response( array('status' => $status), 200 );
+	}
+
+	/**
+	 * @param $request
+	 *
+	 * @return mixed
+	 */
+	public function admin_permissions_check( $request ) {
+		return current_user_can( 'manage_options' );
 	}
 
 	/**
@@ -227,12 +288,19 @@ class Mobile_Builder_Admin {
 	 */
 	public function add_plugin_admin_menu() {
 		/*
-		 * Add a settings page for this plugin to the sidebar.
+		 * Add a settings page for this plugin to the Settings menu.
 		 */
+		$hook_suffix = add_options_page(
+			__( 'Rnlab - App Control', $this->plugin_name ),
+			__( 'Rnlab - App Control', $this->plugin_name ),
+			'manage_options',
+			$this->plugin_name,
+			array( $this, 'display_plugin_admin_page' )
+		);
 
 		$hook_suffix = add_menu_page(
-			__( 'Mobile Builder', $this->plugin_name ),
-			__( 'Mobile Builder', $this->plugin_name ),
+			__( 'Rnlab - App Control', $this->plugin_name ),
+			__( 'Rnlab - App Control', $this->plugin_name ),
 			'manage_options',
 			$this->plugin_name,
 			array( $this, 'display_plugin_admin_page' ),
@@ -267,6 +335,5 @@ class Mobile_Builder_Admin {
 			$links
 		);
 	}
-
 
 }

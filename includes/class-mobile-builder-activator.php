@@ -18,28 +18,26 @@
  * @since      1.0.0
  * @package    Mobile_Builder
  * @subpackage Mobile_Builder/includes
- * @author     Ngoc Dang <ngocdt@rnlab.io>
+ * @author     RNLAB <ngocdt@rnlab.io>
  */
-class Mobile_Builder_Activator
-{
+class Mobile_Builder_Activator {
 
-    /**
-     * Short Description. (use period)
-     *
-     * Long Description.
-     *
-     * @since    1.0.0
-     */
-    public static function activate()
-    {
-        global $wpdb;
+	/**
+	 * Short Description. (use period)
+	 *
+	 * Long Description.
+	 *
+	 * @since    1.0.0
+	 */
+	public static function activate() {
+		global $wpdb;
 
-        $table_name = $wpdb->prefix . "mobile_builder_templates";
-        $charset_collate = $wpdb->get_charset_collate();
+   		$table_name = $wpdb->prefix . "rnlab_template_mobile";
+   		$charset_collate = $wpdb->get_charset_collate();
 
-        $sql = "CREATE TABLE $table_name (
+   		$sql = "CREATE TABLE $table_name (
 		  id mediumint(9) NOT NULL AUTO_INCREMENT,
-		  name VARCHAR(254) NULL DEFAULT 'Default template',
+		  name VARCHAR(254) NULL DEFAULT 'Oreo Native',
 		  data longtext NULL DEFAULT NULL,
 		  settings longtext NULL DEFAULT NULL,
 		  status TINYINT NOT NULL DEFAULT '0',
@@ -48,8 +46,8 @@ class Mobile_Builder_Activator
 		  PRIMARY KEY (id)
 		) $charset_collate;";
 
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
-    }
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta( $sql );
+	}
 
 }

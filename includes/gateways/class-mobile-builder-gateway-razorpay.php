@@ -1,18 +1,17 @@
 <?php
 
 /**
- * REST API endpoint for WooCommerce Payment via PayPal Standard.
+ * REST API endpoint for WooCommerce Payment via Razorpay Standard.
  *
  * @since      1.1.0
  *
- * @link https://docs.woocommerce.com/document/paypal-standard/ PayPal Standard
  *
- * @package    Rnlab_App_Control
- * @subpackage Rnlab_App_Control/includes/gateways
+ * @package    Mobile_Builder
+ * @subpackage Mobile_Builder/includes/gateways
  * @author     Ngoc Dang
  */
 
-class Rnlab_App_Control_Gateway_PayPal {
+class Mobile_Builder_Gateway_Razorpay {
 
 	/**
 	 * The ID of the corresponding WooCommerce Payment Gateway.
@@ -20,11 +19,10 @@ class Rnlab_App_Control_Gateway_PayPal {
 	 * @since    1.1.0
 	 * @var      string    $id    The ID of the corresponding Gateway.
 	 *
-	 * @link https://github.com/woocommerce/woocommerce/blob/master/includes/gateways/paypal/class-wc-gateway-paypal.php#L40 Gateway ID
 	 * @author Ngoc Dang
 	 *
 	 */
-	public $gateway_id = 'paypal';
+	public $gateway_id = 'razorpay';
 
 	/**
 	 * The version of this plugin.
@@ -32,10 +30,9 @@ class Rnlab_App_Control_Gateway_PayPal {
 	 * @since    1.1.0
 	 * @var      string    $version    The current version of corresponding Gateway.
 	 *
-	 * @link https://github.com/woocommerce/woocommerce/blob/master/includes/gateways/paypal/class-wc-gateway-paypal.php#L9 Gateway Version
 	 * @author Ngoc Dang
 	 */
-	private $gateway_version = '2.3.0';
+	private $gateway_version = '2.3.1';
 
 	/**
 	 * Initialize the class and set its properties.
@@ -55,6 +52,14 @@ class Rnlab_App_Control_Gateway_PayPal {
 	 * @author Ngoc Dang
 	 */
 	public function rnlab_pre_process_payment($parameters) {
+
+		WC()->session = new WC_Session_Handler();
+		WC()->session->init();
+
+		// $_POST['payment_method'] = $this->gateway_id;
+
+		// do_action('woocommerce_api_' . $this->gateway_id);
+
 		$parameters['pre_process_result'] = true;
 		return $parameters;
 	}

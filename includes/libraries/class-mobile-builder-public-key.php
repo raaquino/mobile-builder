@@ -3,11 +3,11 @@
 use Firebase\JWT\JWT;
 
 /**
- * Class Rnlab_App_Control_Public_Key
+ * Class Mobile_Builder_Public_Key
  * @author ngocdt@rnlab.io
  * @since 1.2.3
  */
-class Rnlab_App_Control_Public_Key {
+class Mobile_Builder_Public_Key {
 
 	/**
 	 * @param $kid

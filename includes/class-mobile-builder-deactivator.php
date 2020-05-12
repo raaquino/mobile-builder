@@ -18,7 +18,7 @@
  * @since      1.0.0
  * @package    Mobile_Builder
  * @subpackage Mobile_Builder/includes
- * @author     Ngoc Dang <ngocdt@rnlab.io>
+ * @author     RNLAB <ngocdt@rnlab.io>
  */
 class Mobile_Builder_Deactivator {
 
