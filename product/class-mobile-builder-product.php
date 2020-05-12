@@ -104,6 +104,12 @@ class Mobile_Builder_Product {
 		return $response;
 	}
 
+	/**
+	 * @param $request
+	 *
+	 * @return array|bool|mixed|WP_Error
+	 * @since    1.0.0
+	 */
 	public function rating_count( $request ) {
 		$product_id = $request->get_param( 'product_id' );
 
@@ -139,6 +145,12 @@ class Mobile_Builder_Product {
 
 	}
 
+	/**
+	 * @param $response
+	 *
+	 * @return mixed
+	 * @since    1.0.0
+	 */
 	public function custom_change_product_response( $response ) {
 		global $woocommerce_wpml;
 
@@ -161,16 +173,34 @@ class Mobile_Builder_Product {
 		return $response;
 	}
 
+	/**
+	 * @param $response
+	 *
+	 * @return mixed
+	 * @since    1.0.0
+	 */
 	public function custom_change_product_cat( $response ) {
 		$response->data['name'] = wp_specialchars_decode( $response->data['name'] );
 
 		return $response;
 	}
 
+	/**
+	 * @param $title
+	 *
+	 * @return string
+	 * @since    1.0.0
+	 */
 	public function custom_the_title( $title ) {
 		return wp_specialchars_decode( $title );
 	}
 
+	/**
+	 * @param $product_data
+	 *
+	 * @return mixed
+	 * @since    1.0.0
+	 */
 	public function custom_woocommerce_rest_prepare_product_variation_object( $product_data ) {
 
 		global $woocommerce_wpml;
@@ -222,6 +252,7 @@ class Mobile_Builder_Product {
 	 * @param $request
 	 *
 	 * @return mixed
+	 * @since    1.0.0
 	 */
 	public function custom_woocommerce_rest_prepare_product_attribute( $response, $item, $request ) {
 
@@ -253,6 +284,14 @@ class Mobile_Builder_Product {
 		return $response;
 	}
 
+	/**
+	 * @param $response
+	 * @param $post
+	 * @param $request
+	 *
+	 * @return mixed
+	 * @since    1.0.0
+	 */
 	public function prepare_product_images( $response, $post, $request ) {
 		global $_wp_additional_image_sizes;
 
@@ -272,6 +311,14 @@ class Mobile_Builder_Product {
 
 	}
 
+	/**
+	 * @param $response
+	 * @param $post
+	 * @param $request
+	 *
+	 * @return mixed
+	 * @since    1.0.0
+	 */
 	public function prepare_product_variation_images( $response, $post, $request ) {
 		global $_wp_additional_image_sizes;
 

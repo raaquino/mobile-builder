@@ -32,10 +32,10 @@ class Mobile_Builder_Activator {
 	public static function activate() {
 		global $wpdb;
 
-   		$table_name = $wpdb->prefix . "rnlab_template_mobile";
-   		$charset_collate = $wpdb->get_charset_collate();
+		$table_name      = $wpdb->prefix . "mobile_builder";
+		$charset_collate = $wpdb->get_charset_collate();
 
-   		$sql = "CREATE TABLE $table_name (
+		$sql = "CREATE TABLE $table_name (
 		  id mediumint(9) NOT NULL AUTO_INCREMENT,
 		  name VARCHAR(254) NULL DEFAULT 'Oreo Native',
 		  data longtext NULL DEFAULT NULL,

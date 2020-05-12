@@ -9,6 +9,7 @@
  * @param bool $data
  *
  * @return bool|string
+ * @since    1.0.0
  */
 function mobile_builder_request( $method, $url, $data = false ) {
 	$curl = curl_init();

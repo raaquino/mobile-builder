@@ -1,29 +1,24 @@
 <?php
 
 /**
- * The plugin bootstrap file
- *
- * This file is read by WordPress to generate the plugin information in the plugin
- * admin area. This file also includes all of the dependencies used by the plugin,
- * registers the activation and deactivation functions, and defines a function
- * that starts the plugin.
  *
  * @link              https://rnlab.io
  * @since             1.0.0
  * @package           Mobile_Builder
  *
  * @wordpress-plugin
- * Plugin Name:       Rnlab - App Control
- * Plugin URI:        https://doc-oreo.rnlab.io/docs/v1/mobile-builder
- * Description:       Add hooks, api routers, auth and app config.
- * Version:           1.4.3
- * Author:            RNLAB
+ * Plugin Name:       Mobile Builder
+ * Plugin URI:        https://doc-oreo.rnlab.io
+ * Description:       The most advanced drag & drop app builder. Create multi templates and app controls.
+ * Version:           1.0.0
+ * Author:            Rnlab.io
  * Author URI:        https://rnlab.io
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       mobile-builder
  * Domain Path:       /languages
  */
+
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {

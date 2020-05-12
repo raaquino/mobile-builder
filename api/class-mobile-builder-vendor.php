@@ -4,7 +4,7 @@
  * The public-facing functionality of the plugin.
  *
  * @link       https://rnlab.io
- * @since      1.4.3
+ * @since      1.0.0
  *
  * @package    Mobile_Builder
  * @subpackage Mobile_Builder/cart
@@ -179,6 +179,12 @@ class Mobile_Builder_Vendor {
 		return $vendor_stores;
 	}
 
+	/**
+	 * @param $request
+	 *
+	 * @return array
+	 * @since    1.0.0
+	 */
 	public function vendor( $request ) {
 		$id         = $request->get_param( 'id' );
 		$store      = get_user_meta( $id, 'wcfmmp_profile_settings', true );
@@ -208,6 +214,13 @@ class Mobile_Builder_Vendor {
 
 	}
 
+	/**
+	 * @param $args
+	 * @param $wp_query
+	 *
+	 * @return mixed
+	 * @since    1.0.0
+	 */
 	public function mbd_product_list_geo_location_filter_post_clauses( $args, $wp_query ) {
 		global $WCFM, $WCFMmp, $wpdb, $wcfmmp_radius_lat, $wcfmmp_radius_lng, $wcfmmp_radius_range;
 
@@ -272,6 +285,7 @@ class Mobile_Builder_Vendor {
 	 * @param $request
 	 *
 	 * @return bool|string
+	 * @since    1.0.0
 	 */
 	public function directions( $request ) {
 		$origin      = $request->get_param( 'origin' );

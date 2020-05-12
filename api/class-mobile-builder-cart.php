@@ -103,6 +103,10 @@ class Mobile_Builder_Cart {
 
 	}
 
+	/**
+	 * @throws Exception
+	 * @since    1.0.0
+	 */
 	public function rnlab_pre_car_rest_api() {
 		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '3.6.0', '>=' ) && WC()->is_rest_api_request() ) {
 			require_once( WC_ABSPATH . 'includes/wc-cart-functions.php' );
@@ -186,6 +190,7 @@ class Mobile_Builder_Cart {
 	 * @param $request
 	 *
 	 * @return array|WP_Error
+	 * @since    1.0.0
 	 */
 	public function add_to_cart( $request ) {
 		try {
@@ -224,6 +229,7 @@ class Mobile_Builder_Cart {
 	 * @param $request
 	 *
 	 * @return array
+	 * @since    1.0.0
 	 */
 	public function update_shipping( $request ) {
 
@@ -257,6 +263,8 @@ class Mobile_Builder_Cart {
 
 	/**
 	 * Get shipping methods.
+	 *
+	 * @since    1.0.0
 	 */
 	public function shipping_methods() {
 
@@ -340,6 +348,7 @@ class Mobile_Builder_Cart {
 	/**
 	 * Get total cart
 	 * @return array
+	 * @since    1.0.0
 	 */
 	public function get_total() {
 		return WC()->cart->get_totals();
@@ -352,6 +361,7 @@ class Mobile_Builder_Cart {
 	 * @param $request
 	 *
 	 * @return Array | WP_Error
+	 * @since    1.0.0
 	 */
 	public function set_quantity( $request ) {
 
@@ -391,6 +401,7 @@ class Mobile_Builder_Cart {
 	 * @param $request
 	 *
 	 * @return Array |WP_Error
+	 * @since    1.0.0
 	 */
 	public function remove_cart_item( $request ) {
 
