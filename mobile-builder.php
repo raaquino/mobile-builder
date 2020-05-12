@@ -30,9 +30,11 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'MOBILE_BUILDER_CONTROL_VERSION', '1.4.3' );
+define( 'MOBILE_BUILDER_CONTROL_VERSION', '1.4.4' );
 
 define( 'MOBILE_BUILDER_PLUGIN_NAME', 'mobile-builder' );
+
+define( 'MOBILE_BUILDER_TABLE_NAME', 'mobile_builder' );
 
 /**
  * The code that runs during plugin activation.
@@ -76,4 +78,5 @@ function run_mobile_builder() {
 	$plugin->run();
 
 }
+
 run_mobile_builder();

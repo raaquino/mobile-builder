@@ -215,6 +215,28 @@ class Mobile_Builder_Vendor {
 	}
 
 	/**
+	 *
+	 * Filter products by vendors
+	 *
+	 * @param $args
+	 * @param $wp_query
+	 *
+	 * @return mixed
+	 */
+	public function mbd_product_list_by_vendor( $args, $wp_query ) {
+
+		global $wpdb;
+
+		$vendor_id = $_GET['vendor_id'];
+
+		if ( $vendor_id ) {
+			$args['where'] .= " AND $wpdb->posts.post_author = $vendor_id";
+		}
+
+		return $args;
+	}
+
+	/**
 	 * @param $args
 	 * @param $wp_query
 	 *

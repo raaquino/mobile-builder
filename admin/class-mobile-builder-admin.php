@@ -100,6 +100,7 @@ class Mobile_Builder_Admin {
 		wp_localize_script( $this->plugin_name, 'wp_rnlab_configs', array(
 				'api_nonce' => wp_create_nonce( 'wp_rest' ),
 				'api_url'   => rest_url( '' ),
+				'plugin_name'   => $this->plugin_name,
 			)
 		);
 
@@ -169,7 +170,7 @@ class Mobile_Builder_Admin {
 
 	/**
 	 * @return array|object|null
-     * @since 1.0.0
+	 * @since 1.0.0
 	 */
 	public function template_configs() {
 		global $wpdb;
@@ -195,7 +196,7 @@ class Mobile_Builder_Admin {
 	 */
 	public function add_template_config( $request ) {
 		global $wpdb;
-		$table_name = $wpdb->prefix . "rnlab_template_mobile";
+		$table_name = $wpdb->prefix . MOBILE_BUILDER_TABLE_NAME;
 
 		$data = $request->get_param( 'data' );
 
@@ -215,7 +216,7 @@ class Mobile_Builder_Admin {
 	 */
 	public function update_template_config( $request ) {
 		global $wpdb;
-		$table_name = $wpdb->prefix . "rnlab_template_mobile";
+		$table_name = $wpdb->prefix . MOBILE_BUILDER_TABLE_NAME;
 
 		$data  = $request->get_param( 'data' );
 		$where = $request->get_param( 'where' );
@@ -237,7 +238,7 @@ class Mobile_Builder_Admin {
 	 */
 	public function delete_template_config( $request ) {
 		global $wpdb;
-		$table_name = $wpdb->prefix . "rnlab_template_mobile";
+		$table_name = $wpdb->prefix . MOBILE_BUILDER_TABLE_NAME;
 
 		$where = $request->get_param( 'where' );
 
@@ -257,7 +258,7 @@ class Mobile_Builder_Admin {
 	 */
 	public function get_configs( $request ) {
 
-		$configs = get_option( 'rnlab_configs', array(
+		$configs = get_option( 'mobile_builder_configs', array(
 			"requireLogin"       => false,
 			"toggleSidebar"      => false,
 			"isBeforeNewProduct" => 5
@@ -277,10 +278,10 @@ class Mobile_Builder_Admin {
 		$data   = $request->get_param( 'data' );
 		$status = false;
 
-		if ( get_option( 'rnlab_configs' ) ) {
-			$status = update_option( 'rnlab_configs', maybe_serialize( $data ) );
+		if ( get_option( 'mobile_builder_configs' ) ) {
+			$status = update_option( 'mobile_builder_configs', maybe_serialize( $data ) );
 		} else {
-			$status = add_option( 'rnlab_configs', maybe_serialize( $data ) );
+			$status = add_option( 'mobile_builder_configs', maybe_serialize( $data ) );
 		}
 
 		return new WP_REST_Response( array( 'status' => $status ), 200 );
@@ -334,7 +335,7 @@ class Mobile_Builder_Admin {
 	 */
 	public function display_plugin_admin_page() {
 		?>
-        <div id="wp-rnlab">Mobile Builder</div><?php
+        <div id="wp-rnlab"></div><?php
 	}
 
 	/**

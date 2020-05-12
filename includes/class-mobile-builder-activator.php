@@ -23,21 +23,21 @@
 class Mobile_Builder_Activator {
 
 	/**
-	 * Short Description. (use period)
+	 * Active plugin action
 	 *
-	 * Long Description.
+	 * Create table to store mobile template
 	 *
 	 * @since    1.0.0
 	 */
 	public static function activate() {
 		global $wpdb;
 
-		$table_name      = $wpdb->prefix . "mobile_builder";
+		$table_name      = $wpdb->prefix . MOBILE_BUILDER_TABLE_NAME;
 		$charset_collate = $wpdb->get_charset_collate();
 
 		$sql = "CREATE TABLE $table_name (
 		  id mediumint(9) NOT NULL AUTO_INCREMENT,
-		  name VARCHAR(254) NULL DEFAULT 'Oreo Native',
+		  name VARCHAR(254) NULL DEFAULT 'Template Name',
 		  data longtext NULL DEFAULT NULL,
 		  settings longtext NULL DEFAULT NULL,
 		  status TINYINT NOT NULL DEFAULT '0',

@@ -214,6 +214,7 @@ class Mobile_Builder {
 		$plugin_api = new Mobile_Builder_Vendor( $this->get_plugin_name(), $this->get_version() );
 		$this->loader->add_action( 'rest_api_init', $plugin_api, 'add_api_routes', 10 );
 		$this->loader->add_filter( 'posts_clauses', $plugin_api, 'mbd_product_list_geo_location_filter_post_clauses', 500, 2 );
+		$this->loader->add_filter( 'posts_clauses', $plugin_api, 'mbd_product_list_by_vendor', 501, 2 );
 
 	}
 

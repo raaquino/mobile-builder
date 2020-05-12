@@ -726,7 +726,7 @@ class Mobile_Builder_Public {
 				$currencies = $woocommerce_wpml->multi_currency->get_currencies( 'include_default = true' );
 			}
 
-			$configs = get_option( 'rnlab_configs', array(
+			$configs = get_option( 'mobile_builder_configs', array(
 				"requireLogin"       => false,
 				"toggleSidebar"      => false,
 				"isBeforeNewProduct" => 5
