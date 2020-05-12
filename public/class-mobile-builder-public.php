@@ -732,6 +732,8 @@ class Mobile_Builder_Public {
 				"isBeforeNewProduct" => 5
 			) );
 
+			$gmw = get_option( 'gmw_options' );
+
 			$templates      = array();
 			$templates_data = $admin->template_configs();
 
@@ -753,6 +755,7 @@ class Mobile_Builder_Public {
 				'date_format'           => get_option( 'date_format' ),
 				'time_format'           => get_option( 'time_format' ),
 				'configs'               => maybe_unserialize( $configs ),
+				'default_location'      => $gmw['post_types_settings'],
 				'templates'             => $decode ? $templates : $templates_data,
 			);
 
