@@ -257,11 +257,35 @@ class Mobile_Builder_Vendor {
 
 		$lat = $_GET['lat'];
 		$lng = $_GET['lng'];
+		$distance = ! empty( $_GET['radius'] ) ? esc_sql( $_GET['radius'] ) : 50;
 
 		if ( $lat && $lng ) {
 
+			$earth_radius = 6371;
+			$units        = 'km';
+			$degree       = 111.045;
+
+			// add units to locations data.
+			$args['fields'] .= ", '{$units}' AS units";
+
+			$args['fields'] .= ", ROUND( {$earth_radius} * acos( cos( radians( {$lat} ) ) * cos( radians( gmw_locations.latitude ) ) * cos( radians( gmw_locations.longitude ) - radians( {$lng} ) ) + sin( radians( {$lat} ) ) * sin( radians( gmw_locations.latitude ) ) ),1 ) AS distance";
 			$args['join']  .= " INNER JOIN {$wpdb->base_prefix}gmw_locations gmw_locations ON $wpdb->posts.ID = gmw_locations.object_id ";
+
+			// calculate the between point.
+			$bet_lat1 = $lat - ( $distance / $degree );
+			$bet_lat2 = $lat + ( $distance / $degree );
+			$bet_lng1 = $lng - ( $distance / ( $degree * cos( deg2rad( $lat ) ) ) );
+			$bet_lng2 = $lng + ( $distance / ( $degree * cos( deg2rad( $lat ) ) ) );
+
 			$args['where'] .= " AND gmw_locations.object_type = 'post'";
+			$args['where'] .= " AND gmw_locations.latitude BETWEEN {$bet_lat1} AND {$bet_lat2}";
+			//$args['where'] .= " AND gmw_locations.longitude BETWEEN {$bet_lng1} AND {$bet_lng2} ";
+
+			// filter locations based on the distance.
+			$args['having'] = "HAVING distance <= {$distance} OR distance IS NULL";
+
+			$args['orderby'] .= ', distance ASC';
+
 		}
 
 		return $args;
