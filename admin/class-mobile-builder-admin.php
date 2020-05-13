@@ -98,9 +98,11 @@ class Mobile_Builder_Admin {
 		), $this->version, true );
 
 		wp_localize_script( $this->plugin_name, 'wp_rnlab_configs', array(
-				'api_nonce' => wp_create_nonce( 'wp_rest' ),
-				'api_url'   => rest_url( '' ),
-				'plugin_name'   => $this->plugin_name,
+				'api_nonce'   => wp_create_nonce( 'wp_rest' ),
+				'api_url'     => rest_url( '' ),
+				'plugin_name' => $this->plugin_name,
+				'app'         => 'foody',
+				'vendor'      => 'wcfm',
 			)
 		);
 
@@ -175,6 +177,7 @@ class Mobile_Builder_Admin {
 	public function template_configs() {
 		global $wpdb;
 		$table_name = $wpdb->prefix . MOBILE_BUILDER_TABLE_NAME;
+
 		return $wpdb->get_results( "SELECT * FROM $table_name", OBJECT );
 	}
 

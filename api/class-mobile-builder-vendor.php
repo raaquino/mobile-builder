@@ -152,6 +152,7 @@ class Mobile_Builder_Vendor {
 			$store_user = wcfmmp_get_store( $key );
 
 			$vendor_stores[] = array_merge( $store, array(
+				'id'                  => $key,
 				'gravatar'            => $gravatar_url,
 				'list_banner_url'     => $list_banner_url,
 				'banner_url'          => $banner_url,
@@ -159,6 +160,11 @@ class Mobile_Builder_Vendor {
 				'avg_review_rating'   => $store_user->get_avg_review_rating(),
 				'total_review_rating' => $store_user->get_total_review_rating(),
 				'total_review_count'  => $store_user->get_total_review_count(),
+				'rating'              => array(
+					'rating' => $store_user->get_total_review_rating(),
+					'count'  => $store_user->get_total_review_count(),
+					'avg'    => $store_user->get_avg_review_rating(),
+				)
 			) );
 		}
 
