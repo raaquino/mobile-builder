@@ -255,9 +255,14 @@ class Mobile_Builder_Vendor {
 
 		global $wpdb;
 
-		$args['join']  .= " INNER JOIN {$wpdb->base_prefix}gmw_locations gmw_locations ON $wpdb->posts.ID = gmw_locations.object_id ";
-//		print_r($args);
-//		$args['where'] .= " AND gmw_locations.object_type = 'post'";
+		$lat = $_GET['lat'];
+		$lng = $_GET['lng'];
+
+		if ( $lat && $lng ) {
+
+			$args['join']  .= " INNER JOIN {$wpdb->base_prefix}gmw_locations gmw_locations ON $wpdb->posts.ID = gmw_locations.object_id ";
+			$args['where'] .= " AND gmw_locations.object_type = 'post'";
+		}
 
 		return $args;
 	}

@@ -123,10 +123,18 @@ class Mobile_Builder_Product {
 			// map distance matrix to product
 			$data = [];
 			foreach ( $response->data as $key => $item ) {
-				$index                   = array_search( $item['id'], $ids );
+				$index                   = array_search( $item['id'], array_column($gmw_locations, 'object_id') );
 				$item['distance_matrix'] = $distance_matrix[ $index ];
 				$data[]                  = $item;
 			}
+
+//			$data[] = array(
+//				'origin_string' => $origin_string,
+//				'destinations_string' => $destinations_string,
+//				'ids' => $ids,
+//				'gmw_locations' => $gmw_locations
+//			);
+
 			$response->data = $data;
 		}
 
