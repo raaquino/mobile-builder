@@ -44,3 +44,20 @@ function mobile_builder_request( $method, $url, $data = false ) {
 
 	return $result;
 }
+
+/**
+ *
+ * Distance matrix
+ *
+ * @param $origin_string
+ * @param $destinations_string
+ * @param $key
+ * @param string $units
+ *
+ * @return mixed
+ */
+function mobile_builder_distance_matrix($origin_string, $destinations_string, $key, $units = 'metric') {
+	$google_map_api = 'https://maps.googleapis.com/maps/api';
+	$url = "$google_map_api/distancematrix/json?units=$units&origins=$origin_string&destinations=$destinations_string&key=$key";
+	return json_decode( mobile_builder_request( 'GET', $url ) )->rows;
+}

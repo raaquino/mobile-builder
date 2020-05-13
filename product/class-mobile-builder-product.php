@@ -64,11 +64,74 @@ class Mobile_Builder_Product {
 	public function add_api_routes() {
 		$namespace = $this->plugin_name . '/v' . intval( $this->version );
 
+		$products = new WC_REST_Products_Controller();
+
 		register_rest_route( $namespace, 'rating-count', array(
 			'methods'  => 'GET',
 			'callback' => array( $this, 'rating_count' ),
 		) );
 
+		register_rest_route( 'wc/v3', 'products-distance', array(
+			'methods'             => 'GET',
+			'callback'            => array( $this, 'get_items' ),
+			'permission_callback' => array( $products, 'get_items_permissions_check' ),
+		) );
+
+	}
+
+	/**
+	 *
+	 * Get products items
+	 *
+	 * @param $request
+	 *
+	 * @return array|WP_Error|WP_REST_Response
+	 */
+	public function get_items( $request ) {
+		global $wpdb;
+
+		$lat = $request->get_param( 'lat' );
+		$lng = $request->get_param( 'lng' );
+
+		$productsClass = new WC_REST_Products_Controller();
+		$response      = $productsClass->get_items( $request );
+
+		if ( $lat && $lng ) {
+
+			$ids = array();
+			foreach ( $response->data as $key => $value ) {
+				$ids[] = $value['id'];
+			}
+
+			// Get all locations
+			$table_name    = $wpdb->prefix . 'gmw_locations';
+			$query         = "SELECT * FROM $table_name WHERE object_id IN (" . implode( ',', $ids ) . ")";
+			$gmw_locations = $wpdb->get_results( $query, OBJECT );
+
+			// Calculator the distance
+			$origins = [];
+			foreach ( $gmw_locations as $key => $value ) {
+				$origins[] = $value->latitude . ',' . $value->longitude;
+			}
+
+			$origin_string       = implode( '|', $origins );
+			$destinations_string = "$lat,$lng";
+			$key                 = MBD_GOOGLE_API_KEY;
+
+			$distance_matrix = mobile_builder_distance_matrix( $origin_string, $destinations_string, $key );
+
+			// map distance matrix to product
+			$data = [];
+			foreach ( $response->data as $key => $item ) {
+				$index                   = array_search( $item['id'], $ids );
+				$item['distance_matrix'] = $distance_matrix[ $index ];
+				$data[]                  = $item;
+			}
+
+			return $data;
+		}
+
+		return $response;
 	}
 
 	/**
@@ -151,7 +214,11 @@ class Mobile_Builder_Product {
 	 * @return mixed
 	 * @since    1.0.0
 	 */
-	public function custom_change_product_response( $response ) {
+	public function custom_change_product_response( $response, $object, $request ) {
+
+//		echo $request->get_param('lng');
+//		echo $request->get_param('lat'); die;
+
 		global $woocommerce_wpml;
 
 		if ( ! empty( $woocommerce_wpml->multi_currency ) && ! empty( $woocommerce_wpml->settings['currencies_order'] ) ) {

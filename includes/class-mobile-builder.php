@@ -215,6 +215,7 @@ class Mobile_Builder {
 		$this->loader->add_action( 'rest_api_init', $plugin_api, 'add_api_routes', 10 );
 //		$this->loader->add_filter( 'posts_clauses', $plugin_api, 'mbd_product_list_geo_location_filter_post_clauses', 500, 2 );
 		$this->loader->add_filter( 'posts_clauses', $plugin_api, 'mbd_product_list_by_vendor', 501, 2 );
+		$this->loader->add_filter( 'posts_clauses', $plugin_api, 'mbd_product_distance', 501, 2 );
 
 	}
 
