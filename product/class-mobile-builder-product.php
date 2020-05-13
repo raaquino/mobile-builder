@@ -127,8 +127,7 @@ class Mobile_Builder_Product {
 				$item['distance_matrix'] = $distance_matrix[ $index ];
 				$data[]                  = $item;
 			}
-
-			return $data;
+			$response->data = $data;
 		}
 
 		return $response;
