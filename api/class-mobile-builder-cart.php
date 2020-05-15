@@ -32,6 +32,8 @@ class Mobile_Builder_Cart {
 	 */
 	private $version;
 
+	private $namespace;
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -44,6 +46,7 @@ class Mobile_Builder_Cart {
 
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
+		$this->namespace   = $plugin_name . '/v' . intval( $version );
 
 	}
 
@@ -53,9 +56,8 @@ class Mobile_Builder_Cart {
 	 * @since 1.0.0
 	 */
 	public function add_api_routes() {
-		$namespace = $this->plugin_name . '/v' . intval( $this->version );
 
-		register_rest_route( $namespace, 'cart', array(
+		register_rest_route( $this->namespace, 'cart', array(
 			array(
 				'methods'  => WP_REST_Server::READABLE,
 				'callback' => array( $this, 'get_cart' ),
@@ -66,41 +68,54 @@ class Mobile_Builder_Cart {
 			)
 		) );
 
-		register_rest_route( $namespace, 'update-shipping', array(
+		register_rest_route( $this->namespace, 'update-shipping', array(
 			'methods'  => WP_REST_Server::CREATABLE,
 			'callback' => array( $this, 'update_shipping' ),
 		) );
 
-		register_rest_route( $namespace, 'cart-total', array(
+		register_rest_route( $this->namespace, 'cart-total', array(
 			'methods'  => WP_REST_Server::READABLE,
 			'callback' => array( $this, 'get_total' ),
 		) );
 
-		register_rest_route( $namespace, 'shipping-methods', array(
+		register_rest_route( $this->namespace, 'shipping-methods', array(
 			'methods'  => WP_REST_Server::READABLE,
 			'callback' => array( $this, 'shipping_methods' ),
 		) );
 
-		register_rest_route( $namespace, 'set-quantity', array(
+		register_rest_route( $this->namespace, 'set-quantity', array(
 			'methods'  => WP_REST_Server::CREATABLE,
 			'callback' => array( $this, 'set_quantity' ),
 		) );
 
-		register_rest_route( $namespace, 'remove-cart-item', array(
+		register_rest_route( $this->namespace, 'remove-cart-item', array(
 			'methods'  => WP_REST_Server::CREATABLE,
 			'callback' => array( $this, 'remove_cart_item' ),
 		) );
 
-		register_rest_route( $namespace, 'add-discount', array(
+		register_rest_route( $this->namespace, 'add-discount', array(
 			'methods'  => WP_REST_Server::CREATABLE,
 			'callback' => array( $this, 'add_discount' ),
 		) );
 
-		register_rest_route( $namespace, 'remove-coupon', array(
+		register_rest_route( $this->namespace, 'remove-coupon', array(
 			'methods'  => WP_REST_Server::CREATABLE,
 			'callback' => array( $this, 'remove_coupon' ),
 		) );
 
+	}
+
+	public function simulate_as_not_rest( $is_rest_api_request ) {
+
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return $is_rest_api_request;
+		}
+
+		if ( false === strpos( $_SERVER['REQUEST_URI'], $this->namespace ) ) {
+			return $is_rest_api_request;
+		}
+
+		return false;
 	}
 
 	/**
@@ -108,16 +123,18 @@ class Mobile_Builder_Cart {
 	 * @since    1.0.0
 	 */
 	public function rnlab_pre_car_rest_api() {
-		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '3.6.0', '>=' ) && WC()->is_rest_api_request() ) {
+
+//		echo get_current_user_id(); die;
+
+		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '3.6.0', '>=' ) ) {
 			require_once( WC_ABSPATH . 'includes/wc-cart-functions.php' );
 			require_once( WC_ABSPATH . 'includes/wc-notice-functions.php' );
-
-			// Disable cookie authentication REST check and only if site is secure.
-			// Todo: Check only our api
-			if ( is_ssl() && true ) {
-				remove_filter( 'rest_authentication_errors', 'rest_cookie_check_errors', 100 );
-			}
-
+//
+//			// Disable cookie authentication REST check and only if site is secure.
+//			if ( is_ssl() ) {
+//				remove_filter( 'rest_authentication_errors', 'rest_cookie_check_errors', 100 );
+//			}
+//
 			if ( is_null( WC()->session ) ) {
 				$session_class = 'WC_Session_Handler';
 
@@ -128,27 +145,40 @@ class Mobile_Builder_Cart {
 				WC()->session = new $session_class();
 				WC()->session->init();
 			}
+//
+//			/**
+//			 * Choose the location save data user
+//			 */
 
-			/**
-			 * Choose the location save data user
-			 */
-			if ( is_null( WC()->customer ) ) {
-				$customer_id = strval( get_current_user_id() );
+//			echo get_current_user_id(); die;
+			$customer_id = strval( get_current_user_id() );
 
-				// If the ID is not ZERO, then the user is logged in.
-				if ( $customer_id > 0 ) {
-					WC()->customer = new WC_Customer( $customer_id ); // Loads from database.
-				} else {
-					WC()->customer = new WC_Customer( $customer_id, true ); // Loads from session.
-				}
-
-				add_action( 'shutdown', array( WC()->customer, 'save' ), 10 );
+			if ( $customer_id > 0 ) {
+				WC()->customer = new WC_Customer( $customer_id, false ); // Loads from database.
+			} else {
+				WC()->customer = new WC_Customer( $customer_id, true ); // Loads from session.
 			}
 
-			// Init cart if null
-			if ( is_null( WC()->cart ) ) {
-				WC()->cart = new WC_Cart();
-			}
+//			if ( is_null( WC()->customer ) ) {
+//
+//				echo get_current_user_id(); die;
+//
+//				$customer_id = strval( get_current_user_id() );
+//
+//				// If the ID is not ZERO, then the user is logged in.
+//				if ( $customer_id > 0 ) {
+//					WC()->customer = new WC_Customer( $customer_id ); // Loads from database.
+//				} else {
+//					WC()->customer = new WC_Customer( $customer_id, true ); // Loads from session.
+//				}
+//
+//				add_action( 'shutdown', array( WC()->customer, 'save' ), 10 );
+//			}
+//
+//			// Init cart if null
+//			if ( is_null( WC()->cart ) ) {
+//				WC()->cart = new WC_Cart();
+//			}
 		}
 	}
 

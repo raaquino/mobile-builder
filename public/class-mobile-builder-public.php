@@ -127,6 +127,11 @@ class Mobile_Builder_Public {
 			'callback' => array( $this, 'login' ),
 		) );
 
+		register_rest_route( $namespace, 'logout', array(
+			'methods'  => WP_REST_Server::READABLE,
+			'callback' => array( $this, 'logout' ),
+		) );
+
 		register_rest_route( $namespace, 'login-otp', array(
 			'methods'  => WP_REST_Server::CREATABLE,
 			'callback' => array( $this, 'login_otp' ),
@@ -1480,6 +1485,19 @@ class Mobile_Builder_Public {
 		);
 
 		return $data;
+	}
+
+	/**
+	 *
+	 * Log out user
+	 *
+	 * @return array
+	 * @since 1.0.0
+	 */
+	public function logout() {
+		wp_logout();
+
+		return array( "success" => true );
 	}
 
 	/**
