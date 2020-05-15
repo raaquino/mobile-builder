@@ -149,6 +149,8 @@ class Mobile_Builder_Vendor {
 			// Mobile Banner URL
 			$mobile_banner_url = $store['mobile_banner'] ? wp_get_attachment_url( $store['mobile_banner'] ) : '';
 
+			$shipping_methods = WCFMmp_Shipping_Zone::get_shipping_methods( 0, $key );
+
 			$store_user = wcfmmp_get_store( $key );
 
 			$vendor_stores[] = array_merge( $store, array(
@@ -164,7 +166,8 @@ class Mobile_Builder_Vendor {
 					'rating' => $store_user->get_total_review_rating(),
 					'count'  => $store_user->get_total_review_count(),
 					'avg'    => $store_user->get_avg_review_rating(),
-				)
+				),
+				'shipping_methods'    => array_column($shipping_methods, 'id'),
 			) );
 		}
 
@@ -208,6 +211,8 @@ class Mobile_Builder_Vendor {
 		// Mobile Banner URL
 		$mobile_banner_url = $store['mobile_banner'] ? wp_get_attachment_url( $store['mobile_banner'] ) : '';
 
+		$shipping_methods = WCFMmp_Shipping_Zone::get_shipping_methods( 0, $id );
+
 		return array_merge( $store, array(
 			'gravatar'            => $gravatar_url,
 			'list_banner_url'     => $list_banner_url,
@@ -216,6 +221,7 @@ class Mobile_Builder_Vendor {
 			'avg_review_rating'   => $store_user->get_avg_review_rating(),
 			'total_review_rating' => $store_user->get_total_review_rating(),
 			'total_review_count'  => $store_user->get_total_review_count(),
+			'shipping_methods'    => array_column($shipping_methods, 'id'),
 		) );
 
 	}
@@ -255,8 +261,8 @@ class Mobile_Builder_Vendor {
 
 		global $wpdb;
 
-		$lat = $_GET['lat'];
-		$lng = $_GET['lng'];
+		$lat      = $_GET['lat'];
+		$lng      = $_GET['lng'];
 		$distance = ! empty( $_GET['radius'] ) ? esc_sql( $_GET['radius'] ) : 50;
 
 		if ( $lat && $lng ) {
@@ -269,7 +275,7 @@ class Mobile_Builder_Vendor {
 			$args['fields'] .= ", '{$units}' AS units";
 
 			$args['fields'] .= ", ROUND( {$earth_radius} * acos( cos( radians( {$lat} ) ) * cos( radians( gmw_locations.latitude ) ) * cos( radians( gmw_locations.longitude ) - radians( {$lng} ) ) + sin( radians( {$lat} ) ) * sin( radians( gmw_locations.latitude ) ) ),1 ) AS distance";
-			$args['join']  .= " INNER JOIN {$wpdb->base_prefix}gmw_locations gmw_locations ON $wpdb->posts.ID = gmw_locations.object_id ";
+			$args['join']   .= " INNER JOIN {$wpdb->base_prefix}gmw_locations gmw_locations ON $wpdb->posts.ID = gmw_locations.object_id ";
 
 			// calculate the between point.
 			$bet_lat1 = $lat - ( $distance / $degree );
