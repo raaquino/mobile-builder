@@ -167,7 +167,7 @@ class Mobile_Builder_Vendor {
 					'count'  => $store_user->get_total_review_count(),
 					'avg'    => $store_user->get_avg_review_rating(),
 				),
-				'shipping_methods'    => array_column($shipping_methods, 'id'),
+				'shipping_methods'    => array_column( $shipping_methods, 'id' ),
 			) );
 		}
 
@@ -195,7 +195,13 @@ class Mobile_Builder_Vendor {
 	 * @since    1.0.0
 	 */
 	public function vendor( $request ) {
-		$id         = $request->get_param( 'id' );
+
+		$params = $request->get_params();
+
+		$id                = $params['id'];
+		$wcfmmp_radius_lat = $params['wcfmmp_radius_lat'];
+		$wcfmmp_radius_lng = $params['wcfmmp_radius_lng'];
+
 		$store      = get_user_meta( $id, 'wcfmmp_profile_settings', true );
 		$store_user = wcfmmp_get_store( $id );
 
@@ -213,7 +219,14 @@ class Mobile_Builder_Vendor {
 
 		$shipping_methods = WCFMmp_Shipping_Zone::get_shipping_methods( 0, $id );
 
+		$origin_string       = $store['store_lat'] . ',' . $store['store_lng'];
+		$destinations_string = "$wcfmmp_radius_lat,$wcfmmp_radius_lng";
+		$key                 = MBD_GOOGLE_API_KEY;
+
+		$distance_matrix = mobile_builder_distance_matrix( $origin_string, $destinations_string, $key );
+
 		return array_merge( $store, array(
+			'id'                  => $id,
 			'gravatar'            => $gravatar_url,
 			'list_banner_url'     => $list_banner_url,
 			'banner_url'          => $banner_url,
@@ -221,7 +234,8 @@ class Mobile_Builder_Vendor {
 			'avg_review_rating'   => $store_user->get_avg_review_rating(),
 			'total_review_rating' => $store_user->get_total_review_rating(),
 			'total_review_count'  => $store_user->get_total_review_count(),
-			'shipping_methods'    => array_column($shipping_methods, 'id'),
+			'shipping_methods'    => array_column( $shipping_methods, 'id' ),
+			'matrix'              => $distance_matrix[0]->elements,
 		) );
 
 	}
