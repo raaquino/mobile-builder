@@ -219,11 +219,14 @@ class Mobile_Builder_Vendor {
 
 		$shipping_methods = WCFMmp_Shipping_Zone::get_shipping_methods( 0, $id );
 
-		$origin_string       = $store['store_lat'] . ',' . $store['store_lng'];
-		$destinations_string = "$wcfmmp_radius_lat,$wcfmmp_radius_lng";
-		$key                 = MBD_GOOGLE_API_KEY;
+		$distance_matrix = array();
 
-		$distance_matrix = mobile_builder_distance_matrix( $origin_string, $destinations_string, $key );
+		if ( $wcfmmp_radius_lat && $wcfmmp_radius_lng && $store['store_lat'] && $store['store_lng'] ) {
+			$origin_string       = $store['store_lat'] . ',' . $store['store_lng'];
+			$destinations_string = "$wcfmmp_radius_lat,$wcfmmp_radius_lng";
+			$key                 = MBD_GOOGLE_API_KEY;
+			$distance_matrix     = mobile_builder_distance_matrix( $origin_string, $destinations_string, $key );
+		}
 
 		return array_merge( $store, array(
 			'id'                  => $id,

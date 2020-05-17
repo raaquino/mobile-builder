@@ -124,17 +124,15 @@ class Mobile_Builder_Cart {
 	 */
 	public function rnlab_pre_car_rest_api() {
 
-//		echo get_current_user_id(); die;
-
-		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '3.6.0', '>=' ) ) {
+		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '3.6.0', '>=' ) && WC()->is_rest_api_request() ) {
 			require_once( WC_ABSPATH . 'includes/wc-cart-functions.php' );
 			require_once( WC_ABSPATH . 'includes/wc-notice-functions.php' );
-//
-//			// Disable cookie authentication REST check and only if site is secure.
-//			if ( is_ssl() ) {
-//				remove_filter( 'rest_authentication_errors', 'rest_cookie_check_errors', 100 );
-//			}
-//
+
+			// Disable cookie authentication REST check and only if site is secure.
+			if ( is_ssl() ) {
+				remove_filter( 'rest_authentication_errors', 'rest_cookie_check_errors', 100 );
+			}
+
 			if ( is_null( WC()->session ) ) {
 				$session_class = 'WC_Session_Handler';
 
@@ -145,40 +143,28 @@ class Mobile_Builder_Cart {
 				WC()->session = new $session_class();
 				WC()->session->init();
 			}
-//
-//			/**
-//			 * Choose the location save data user
-//			 */
 
-//			echo get_current_user_id(); die;
-			$customer_id = strval( get_current_user_id() );
+			/**
+			 * Choose the location save data user
+			 */
+			if ( is_null( WC()->customer ) ) {
 
-			if ( $customer_id > 0 ) {
-				WC()->customer = new WC_Customer( $customer_id, false ); // Loads from database.
-			} else {
-				WC()->customer = new WC_Customer( $customer_id, true ); // Loads from session.
+				$customer_id = strval( get_current_user_id() );
+
+				// If the ID is not ZERO, then the user is logged in.
+				if ( $customer_id > 0 ) {
+					WC()->customer = new WC_Customer( $customer_id ); // Loads from database.
+				} else {
+					WC()->customer = new WC_Customer( $customer_id, true ); // Loads from session.
+				}
+
+				add_action( 'shutdown', array( WC()->customer, 'save' ), 10 );
 			}
 
-//			if ( is_null( WC()->customer ) ) {
-//
-//				echo get_current_user_id(); die;
-//
-//				$customer_id = strval( get_current_user_id() );
-//
-//				// If the ID is not ZERO, then the user is logged in.
-//				if ( $customer_id > 0 ) {
-//					WC()->customer = new WC_Customer( $customer_id ); // Loads from database.
-//				} else {
-//					WC()->customer = new WC_Customer( $customer_id, true ); // Loads from session.
-//				}
-//
-//				add_action( 'shutdown', array( WC()->customer, 'save' ), 10 );
-//			}
-//
-//			// Init cart if null
-//			if ( is_null( WC()->cart ) ) {
-//				WC()->cart = new WC_Cart();
-//			}
+			// Init cart if null
+			if ( is_null( WC()->cart ) ) {
+				WC()->cart = new WC_Cart();
+			}
 		}
 	}
 
