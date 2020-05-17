@@ -180,7 +180,8 @@ class Mobile_Builder_Cart {
 
 
 		foreach ( $items as $cart_item_key => $cart_item ) {
-			$_product = $cart_item['data'];
+			$_product  = $cart_item['data'];
+			$vendor_id = wcfm_get_vendor_id_by_post( $_product->get_id() );
 
 			$image = wp_get_attachment_image_src( get_post_thumbnail_id( $_product->get_id() ), 'single-post-thumbnail' );
 			if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 ) {
@@ -189,6 +190,8 @@ class Mobile_Builder_Cart {
 				$items[ $cart_item_key ]['is_sold_individually'] = $_product->is_sold_individually();
 				$items[ $cart_item_key ]['name']                 = $_product->get_name();
 				$items[ $cart_item_key ]['price']                = WC()->cart->get_product_price( $_product );
+				$items[ $cart_item_key ]['vendor_id']            = $vendor_id;
+				$items[ $cart_item_key ]['store']                = $vendor_id ? $store_user = get_user_meta( $vendor_id, 'wcfmmp_profile_settings', true ) : null;
 			}
 
 		}
