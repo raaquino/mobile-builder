@@ -118,6 +118,10 @@ class Mobile_Builder_Cart {
 		return false;
 	}
 
+	public function mobile_builder_woocommerce_persistent_cart_enabled() {
+		return false;
+	}
+
 	/**
 	 * @throws Exception
 	 * @since    1.0.0
