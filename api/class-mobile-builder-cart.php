@@ -64,13 +64,23 @@ class Mobile_Builder_Cart {
 			),
 			array(
 				'methods'  => WP_REST_Server::CREATABLE,
-				'callback' => array( $this, 'add_to_cart' ),
+				'callback' => array( $this, 'mobile_builder_add_to_cart' ),
 			)
 		) );
 
 		register_rest_route( $this->namespace, 'update-shipping', array(
 			'methods'  => WP_REST_Server::CREATABLE,
 			'callback' => array( $this, 'update_shipping' ),
+		) );
+
+		register_rest_route( $this->namespace, 'update-order-review', array(
+			'methods'  => WP_REST_Server::CREATABLE,
+			'callback' => array( $this, 'mobile_builder_update_order_review' ),
+		) );
+
+		register_rest_route( $this->namespace, 'checkout', array(
+			'methods'  => WP_REST_Server::CREATABLE,
+			'callback' => array( $this, 'mobile_builder_checkout' ),
 		) );
 
 		register_rest_route( $this->namespace, 'cart-total', array(
@@ -126,7 +136,7 @@ class Mobile_Builder_Cart {
 	 * @throws Exception
 	 * @since    1.0.0
 	 */
-	public function rnlab_pre_car_rest_api() {
+	public function mobile_builder_pre_car_rest_api() {
 
 		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '3.6.0', '>=' ) && WC()->is_rest_api_request() ) {
 			require_once( WC_ABSPATH . 'includes/wc-cart-functions.php' );
@@ -182,7 +192,6 @@ class Mobile_Builder_Cart {
 
 		$items = WC()->cart->get_cart();
 
-
 		foreach ( $items as $cart_item_key => $cart_item ) {
 			$_product  = $cart_item['data'];
 			$vendor_id = wcfm_get_vendor_id_by_post( $_product->get_id() );
@@ -215,7 +224,19 @@ class Mobile_Builder_Cart {
 	 * @return array|WP_Error
 	 * @since    1.0.0
 	 */
-	public function add_to_cart( $request ) {
+	public function mobile_builder_add_to_cart( $request ) {
+
+		// Login before add to cart
+		if ( get_current_user_id() == 0 ) {
+			return new WP_Error(
+				'mobile_builder_add_to_cart',
+				'Login to add to cart!',
+				array(
+					'status' => 403,
+				)
+			);
+		}
+
 		try {
 			$product_id     = $request->get_param( 'product_id' );
 			$quantity       = $request->get_param( 'quantity' );
@@ -234,11 +255,6 @@ class Mobile_Builder_Cart {
 			return WC()->cart->get_cart_item( $cart_item_key );
 		} catch ( \Exception $e ) {
 			//do something when exception is thrown
-			return new WP_Error( 'add_to_cart', $e->getMessage(), array(
-				'status' => 403,
-			) );
-		} catch ( \Throwable $e ) {
-			//do something when Throwable is thrown
 			return new WP_Error( 'add_to_cart', $e->getMessage(), array(
 				'status' => 403,
 			) );
@@ -284,6 +300,122 @@ class Mobile_Builder_Cart {
 
 	}
 
+	public function mobile_builder_update_order_review( $request ) {
+//		check_ajax_referer( 'update-order-review', 'security' );
+
+		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
+
+		if ( WC()->cart->is_empty() && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_update_order_review_expired', true ) ) {
+			return new WP_Error( 404, 'Sorry, your session has expired.' );
+		}
+
+//		do_action( 'woocommerce_checkout_update_order_review', $request->get_param( 'post_data') ) ? wp_unslash( $request->get_param( 'post_data') ) : '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+		$posted_shipping_methods = $request->get_param( 'shipping_method' ) ? wc_clean( wp_unslash( $request->get_param( 'shipping_method' ) ) ) : array();
+
+		if ( is_array( $posted_shipping_methods ) ) {
+			foreach ( $posted_shipping_methods as $i => $value ) {
+				$chosen_shipping_methods[ $i ] = $value;
+			}
+		}
+
+		WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
+		WC()->session->set( 'chosen_payment_method', empty( $request->get_param( 'shipping_method' ) ) ? '' : wc_clean( wp_unslash( $request->get_param( 'shipping_method' ) ) ) );
+		WC()->customer->set_props(
+			array(
+				'billing_country'   => $request->get_param( 'country' ) ? wc_clean( wp_unslash( $request->get_param( 'country' ) ) ) : null,
+				'billing_state'     => $request->get_param( 'state' ) ? wc_clean( wp_unslash( $request->get_param( 'state' ) ) ) : null,
+				'billing_postcode'  => $request->get_param( 'postcode' ) ? wc_clean( wp_unslash( $request->get_param( 'postcode' ) ) ) : null,
+				'billing_city'      => $request->get_param( 'city' ) ? wc_clean( wp_unslash( $request->get_param( 'city' ) ) ) : null,
+				'billing_address_1' => $request->get_param( 'address' ) ? wc_clean( wp_unslash( $request->get_param( 'address' ) ) ) : null,
+				'billing_address_2' => $request->get_param( 'address_2' ) ? wc_clean( wp_unslash( $request->get_param( 'address_2' ) ) ) : null,
+				'billing_company'   => $request->get_param( 'company' ) ? wc_clean( wp_unslash( $request->get_param( 'company' ) ) ) : null,
+			)
+		);
+
+		if ( wc_ship_to_billing_address_only() ) {
+			WC()->customer->set_props(
+				array(
+					'shipping_country'   => $request->get_param( 'country' ) ? wc_clean( wp_unslash( $request->get_param( 'country' ) ) ) : null,
+					'shipping_state'     => $request->get_param( 'state' ) ? wc_clean( wp_unslash( $request->get_param( 'state' ) ) ) : null,
+					'shipping_postcode'  => $request->get_param( 'postcode' ) ? wc_clean( wp_unslash( $request->get_param( 'postcode' ) ) ) : null,
+					'shipping_city'      => $request->get_param( 'city' ) ? wc_clean( wp_unslash( $request->get_param( 'city' ) ) ) : null,
+					'shipping_address_1' => $request->get_param( 'address' ) ? wc_clean( wp_unslash( $request->get_param( 'address' ) ) ) : null,
+					'shipping_address_2' => $request->get_param( 'address_2' ) ? wc_clean( wp_unslash( $request->get_param( 'address_2' ) ) ) : null,
+					'shipping_company'   => $request->get_param( 'company' ) ? wc_clean( wp_unslash( $request->get_param( 'company' ) ) ) : null,
+				)
+			);
+		} else {
+			WC()->customer->set_props(
+				array(
+					'shipping_country'   => $request->get_param( 's_country' ) ? wc_clean( wp_unslash( $request->get_param( 's_country' ) ) ) : null,
+					'shipping_state'     => $request->get_param( 's_state' ) ? wc_clean( wp_unslash( $request->get_param( 's_state' ) ) ) : null,
+					'shipping_postcode'  => $request->get_param( 's_postcode' ) ? wc_clean( wp_unslash( $request->get_param( 's_postcode' ) ) ) : null,
+					'shipping_city'      => $request->get_param( 's_city' ) ? wc_clean( wp_unslash( $request->get_param( 's_city' ) ) ) : null,
+					'shipping_address_1' => $request->get_param( 's_address' ) ? wc_clean( wp_unslash( $request->get_param( 's_address' ) ) ) : null,
+					'shipping_address_2' => $request->get_param( 's_address_2' ) ? wc_clean( wp_unslash( $request->get_param( 's_address_2' ) ) ) : null,
+					'shipping_company'   => $request->get_param( 's_company' ) ? wc_clean( wp_unslash( $request->get_param( 's_company' ) ) ) : null,
+				)
+			);
+		}
+
+		if ( $request->get_param( 'has_full_address' ) && wc_string_to_bool( wc_clean( wp_unslash( $request->get_param( 'has_full_address' ) ) ) ) ) {
+			WC()->customer->set_calculated_shipping( true );
+		} else {
+			WC()->customer->set_calculated_shipping( false );
+		}
+
+		WC()->customer->save();
+
+		// Calculate shipping before totals. This will ensure any shipping methods that affect things like taxes are chosen prior to final totals being calculated. Ref: #22708.
+		WC()->cart->calculate_shipping();
+		WC()->cart->calculate_totals();
+
+		// Get order review fragment.
+		ob_start();
+		woocommerce_order_review();
+		$woocommerce_order_review = ob_get_clean();
+
+		// Get checkout payment fragment.
+		ob_start();
+		woocommerce_checkout_payment();
+		$woocommerce_checkout_payment = ob_get_clean();
+
+		// Get messages if reload checkout is not true.
+		$reload_checkout = isset( WC()->session->reload_checkout ) ? true : false;
+		if ( ! $reload_checkout ) {
+			$messages = wc_print_notices( true );
+		} else {
+			$messages = '';
+		}
+
+		unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
+
+		wp_send_json(
+			array(
+				'result'    => empty( $messages ) ? 'success' : 'failure',
+				'messages'  => $messages,
+				'reload'    => $reload_checkout,
+				'nonce'     => wp_create_nonce( 'woocommerce-process_checkout' ),
+				'fragments' => apply_filters(
+					'woocommerce_update_order_review_fragments',
+					array(
+						'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
+						'.woocommerce-checkout-payment'            => $woocommerce_checkout_payment,
+					)
+				),
+			)
+		);
+	}
+
+	public function mobile_builder_checkout() {
+
+		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
+		WC()->checkout()->process_checkout();
+		wp_die( 0 );
+	}
+
 	/**
 	 * Get shipping methods.
 	 *
@@ -296,11 +428,11 @@ class Mobile_Builder_Cart {
 //		WC()->customer->set_props(
 //			array(
 //				'shipping_country'   => 'VE',
-//				'shipping_state'     => isset( $_POST['state'] ) ? wc_clean( wp_unslash( $_POST['state'] ) ) : null,
-//				'shipping_postcode'  => isset( $_POST['postcode'] ) ? wc_clean( wp_unslash( $_POST['postcode'] ) ) : null,
-//				'shipping_city'      => isset( $_POST['city'] ) ? wc_clean( wp_unslash( $_POST['city'] ) ) : null,
-//				'shipping_address_1' => isset( $_POST['address'] ) ? wc_clean( wp_unslash( $_POST['address'] ) ) : null,
-//				'shipping_address_2' => isset( $_POST['address_2'] ) ? wc_clean( wp_unslash( $_POST['address_2'] ) ) : null,
+//				'shipping_state'     => $request->get_param( 'state') ) ? wc_clean( wp_unslash( $request->get_param( 'state') ) ) : null,
+//				'shipping_postcode'  => $request->get_param( 'postcode') ) ? wc_clean( wp_unslash( $request->get_param( 'postcode') ) ) : null,
+//				'shipping_city'      => $request->get_param( 'city') ) ? wc_clean( wp_unslash( $request->get_param( 'city') ) ) : null,
+//				'shipping_address_1' => $request->get_param( 'address') ) ? wc_clean( wp_unslash( $request->get_param( 'address') ) ) : null,
+//				'shipping_address_2' => $request->get_param( 'address_2') ) ? wc_clean( wp_unslash( $request->get_param( 'address_2') ) ) : null,
 //			)
 //		);
 
