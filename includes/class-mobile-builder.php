@@ -207,8 +207,8 @@ class Mobile_Builder {
 
 		// Cart
 		$plugin_cart = new Mobile_Builder_Cart( $this->get_plugin_name(), $this->get_version() );
-		$this->loader->add_action( 'wp_loaded', $plugin_cart, 'mobile_builder_pre_car_rest_api', 5 );
 		$this->loader->add_action( 'rest_api_init', $plugin_cart, 'add_api_routes', 10 );
+		$this->loader->add_action( 'wp_loaded', $plugin_cart, 'mobile_builder_pre_car_rest_api', 5 );
 //		$this->loader->add_filter( 'woocommerce_is_rest_api_request', $plugin_cart, 'simulate_as_not_rest', 10 );
 		$this->loader->add_filter( 'woocommerce_persistent_cart_enabled', $plugin_cart, 'mobile_builder_woocommerce_persistent_cart_enabled' );
 

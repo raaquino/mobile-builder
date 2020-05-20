@@ -410,8 +410,8 @@ class Mobile_Builder_Cart {
 	}
 
 	public function mobile_builder_checkout() {
-
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
+		wc_maybe_define_constant( 'DOING_AJAX', true );
 		WC()->checkout()->process_checkout();
 		wp_die( 0 );
 	}
