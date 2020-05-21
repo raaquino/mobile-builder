@@ -198,11 +198,19 @@ class Mobile_Builder_Cart {
 
 			$image = wp_get_attachment_image_src( get_post_thumbnail_id( $_product->get_id() ), 'single-post-thumbnail' );
 			if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 ) {
+
+				if ( WC()->cart->display_prices_including_tax() ) {
+					$product_price = wc_get_price_including_tax( $_product );
+				} else {
+					$product_price = wc_get_price_excluding_tax( $_product );
+				}
+
 				$items[ $cart_item_key ]['thumbnail']            = $_product->get_image();
 				$items[ $cart_item_key ]['thumb']                = $image[0];
 				$items[ $cart_item_key ]['is_sold_individually'] = $_product->is_sold_individually();
 				$items[ $cart_item_key ]['name']                 = $_product->get_name();
-				$items[ $cart_item_key ]['price']                = WC()->cart->get_product_price( $_product );
+				$items[ $cart_item_key ]['price']                = $product_price;
+				$items[ $cart_item_key ]['price_html']           = WC()->cart->get_product_price( $_product );
 				$items[ $cart_item_key ]['vendor_id']            = $vendor_id;
 				$items[ $cart_item_key ]['store']                = $vendor_id ? $store_user = get_user_meta( $vendor_id, 'wcfmmp_profile_settings', true ) : null;
 			}
@@ -394,21 +402,21 @@ class Mobile_Builder_Cart {
 
 		wp_send_json(
 			array(
-				'result'    => empty( $messages ) ? 'success' : 'failure',
-				'messages'  => $messages,
-				'reload'    => $reload_checkout,
-				'nonce'     => wp_create_nonce( 'woocommerce-process_checkout' ),
-				'fragments' => apply_filters(
-					'woocommerce_update_order_review_fragments',
-					array(
-						'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
-						'.woocommerce-checkout-payment'            => $woocommerce_checkout_payment,
-					)
-				),
+				'result'   => empty( $messages ) ? 'success' : 'failure',
+				'messages' => $messages,
+				'reload'   => $reload_checkout,
+				'nonce'    => wp_create_nonce( 'woocommerce-process_checkout' ),
+				'totals'   => WC()->cart->get_totals(),
 			)
 		);
 	}
 
+	/**
+	 *
+	 * Checkout progress
+	 *
+	 * @throws Exception
+	 */
 	public function mobile_builder_checkout() {
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 		wc_maybe_define_constant( 'DOING_AJAX', true );
@@ -422,26 +430,6 @@ class Mobile_Builder_Cart {
 	 * @since    1.0.0
 	 */
 	public function shipping_methods() {
-
-//		global $woocommerce;
-
-//		WC()->customer->set_props(
-//			array(
-//				'shipping_country'   => 'VE',
-//				'shipping_state'     => $request->get_param( 'state') ) ? wc_clean( wp_unslash( $request->get_param( 'state') ) ) : null,
-//				'shipping_postcode'  => $request->get_param( 'postcode') ) ? wc_clean( wp_unslash( $request->get_param( 'postcode') ) ) : null,
-//				'shipping_city'      => $request->get_param( 'city') ) ? wc_clean( wp_unslash( $request->get_param( 'city') ) ) : null,
-//				'shipping_address_1' => $request->get_param( 'address') ) ? wc_clean( wp_unslash( $request->get_param( 'address') ) ) : null,
-//				'shipping_address_2' => $request->get_param( 'address_2') ) ? wc_clean( wp_unslash( $request->get_param( 'address_2') ) ) : null,
-//			)
-//		);
-
-//		$data = 'billing_first_name=&billing_last_name=&billing_company=&billing_country=VE&billing_address_1=&billing_address_2=&billing_city=&billing_state=&billing_postcode=&billing_phone=&billing_email=admin%40gmail.com&shipping_first_name=&shipping_last_name=&shipping_company=&shipping_country=VN&shipping_address_1=&shipping_address_2=&shipping_postcode=&shipping_city=&shipping_state=&order_comments=&shipping_method%5B15%5D=free_shipping%3A3&shipping_method%5B18%5D=free_shipping%3A3&payment_method=bacs&woocommerce-process-checkout-nonce=a1194af571&_wp_http_referer=%2Fwpdev%2F%3Fwc-ajax%3Dupdate_order_review';
-//
-//
-//		do_action( 'woocommerce_checkout_update_order_review', isset( $data ) ? wp_unslash( $data ) : '' );
-
-//		WC()->customer->save();
 
 		// Calculate shipping before totals. This will ensure any shipping methods that affect things like taxes are chosen prior to final totals being calculated. Ref: #22708.
 		WC()->cart->calculate_shipping();
@@ -462,12 +450,6 @@ class Mobile_Builder_Cart {
 				}
 				$product_names = apply_filters( 'woocommerce_shipping_package_details_array', $product_names, $package );
 			}
-
-//			print_r($package['rates']['flat_rate:2']->get_label()); die;
-
-//			$rate = $package['rates'][  ];
-
-//			echo $rate->get_label();
 
 			$available_methods = array();
 
