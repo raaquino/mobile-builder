@@ -218,8 +218,9 @@ class Mobile_Builder_Cart {
 		}
 
 		return array(
-			'items'  => $items,
-			'totals' => WC()->cart->get_totals(),
+			'items'   => $items,
+			'totals'  => WC()->cart->get_totals(),
+			'coupons' => WC()->cart->get_applied_coupons(),
 		);
 	}
 
