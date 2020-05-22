@@ -61,56 +61,67 @@ class Mobile_Builder_Cart {
 			array(
 				'methods'  => WP_REST_Server::READABLE,
 				'callback' => array( $this, 'get_cart' ),
+				'permission_callback' => array( $this, 'user_permissions_check' ),
 			),
 			array(
 				'methods'  => WP_REST_Server::CREATABLE,
-				'callback' => array( $this, 'mobile_builder_add_to_cart' ),
+				'callback' => array( $this, 'add_to_cart' ),
+				'permission_callback' => array( $this, 'user_permissions_check' ),
 			)
 		) );
 
 		register_rest_route( $this->namespace, 'update-shipping', array(
 			'methods'  => WP_REST_Server::CREATABLE,
 			'callback' => array( $this, 'update_shipping' ),
+			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'update-order-review', array(
 			'methods'  => WP_REST_Server::CREATABLE,
 			'callback' => array( $this, 'mobile_builder_update_order_review' ),
+			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'checkout', array(
 			'methods'  => WP_REST_Server::CREATABLE,
-			'callback' => array( $this, 'mobile_builder_checkout' ),
+			'callback' => array( $this, 'checkout' ),
+			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'cart-total', array(
 			'methods'  => WP_REST_Server::READABLE,
 			'callback' => array( $this, 'get_total' ),
+			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'shipping-methods', array(
 			'methods'  => WP_REST_Server::READABLE,
 			'callback' => array( $this, 'shipping_methods' ),
+			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'set-quantity', array(
 			'methods'  => WP_REST_Server::CREATABLE,
 			'callback' => array( $this, 'set_quantity' ),
+			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'remove-cart-item', array(
 			'methods'  => WP_REST_Server::CREATABLE,
 			'callback' => array( $this, 'remove_cart_item' ),
+			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'add-discount', array(
 			'methods'  => WP_REST_Server::CREATABLE,
 			'callback' => array( $this, 'add_discount' ),
+			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'remove-coupon', array(
 			'methods'  => WP_REST_Server::CREATABLE,
 			'callback' => array( $this, 'remove_coupon' ),
+			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 	}
@@ -233,18 +244,7 @@ class Mobile_Builder_Cart {
 	 * @return array|WP_Error
 	 * @since    1.0.0
 	 */
-	public function mobile_builder_add_to_cart( $request ) {
-
-		// Login before add to cart
-		if ( get_current_user_id() == 0 ) {
-			return new WP_Error(
-				'mobile_builder_add_to_cart',
-				'Login to add to cart!',
-				array(
-					'status' => 403,
-				)
-			);
-		}
+	public function add_to_cart( $request ) {
 
 		try {
 			$product_id     = $request->get_param( 'product_id' );
@@ -418,7 +418,7 @@ class Mobile_Builder_Cart {
 	 *
 	 * @throws Exception
 	 */
-	public function mobile_builder_checkout() {
+	public function checkout() {
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 		wc_maybe_define_constant( 'DOING_AJAX', true );
 		WC()->checkout()->process_checkout();
@@ -633,5 +633,18 @@ class Mobile_Builder_Cart {
 			);
 		}
 
+	}
+
+	/**
+	 *
+	 * Check user logged in
+	 *
+	 * @param $request
+	 *
+	 * @since 1.0.0
+	 * @return bool
+	 */
+	public function user_permissions_check( $request ) {
+		return is_user_logged_in();
 	}
 }
