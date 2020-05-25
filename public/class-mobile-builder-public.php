@@ -62,7 +62,7 @@ class Mobile_Builder_Public {
 
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
-		$this->key         = defined( 'JWT_SECRET_KEY' ) ? JWT_SECRET_KEY : "example_key";
+		$this->key         = defined( 'MOBILE_BUILDER_JWT_SECRET_KEY' ) ? MOBILE_BUILDER_JWT_SECRET_KEY : "example_key";
 
 	}
 
@@ -1368,8 +1368,8 @@ class Mobile_Builder_Public {
 		$token = $request->get_param( 'token' );
 
 		$fb = new \Facebook\Facebook( [
-			'app_id'                => FB_APP_ID,
-			'app_secret'            => FB_APP_SECRET,
+			'app_id'                => MOBILE_BUILDER_FB_APP_ID,
+			'app_secret'            => MOBILE_BUILDER_FB_APP_SECRET,
 			'default_graph_version' => 'v2.10',
 			//'default_access_token' => '{access-token}', // optional
 		] );
@@ -1507,10 +1507,10 @@ class Mobile_Builder_Public {
 
 		try {
 
-			if ( ! defined( 'MBD_FIREBASE_SERVER_KEY' ) ) {
+			if ( ! defined( 'MOBILE_BUILDER_FIREBASE_SERVER_KEY' ) ) {
 				return new WP_Error(
 					'not_exist_firebase_server_key',
-					'The MBD_FIREBASE_SERVER_KEY not define in wp-config.php',
+					'The MOBILE_BUILDER_FIREBASE_SERVER_KEY not define in wp-config.php',
 					array(
 						'status' => 403,
 					)
@@ -1519,7 +1519,7 @@ class Mobile_Builder_Public {
 
 			$idToken = $request->get_param( 'idToken' );
 
-			$url  = 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/getAccountInfo?key=' . MBD_FIREBASE_SERVER_KEY;
+			$url  = 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/getAccountInfo?key=' . MOBILE_BUILDER_FIREBASE_SERVER_KEY;
 			$data = array( 'idToken' => $idToken );
 
 			// use key 'http' even if you send the request to https://...

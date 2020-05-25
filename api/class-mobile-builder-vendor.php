@@ -173,7 +173,7 @@ class Mobile_Builder_Vendor {
 
 		$origin_string       = implode( '|', $origins );
 		$destinations_string = "$wcfmmp_radius_lat,$wcfmmp_radius_lng";
-		$key                 = MBD_GOOGLE_API_KEY;
+		$key                 = MOBILE_BUILDER_GOOGLE_API_KEY;
 
 		$url = "$this->google_map_api/distancematrix/json?units=$units&origins=$origin_string&destinations=$destinations_string&key=$key";
 
@@ -224,7 +224,7 @@ class Mobile_Builder_Vendor {
 		if ( $wcfmmp_radius_lat && $wcfmmp_radius_lng && $store['store_lat'] && $store['store_lng'] ) {
 			$origin_string       = $store['store_lat'] . ',' . $store['store_lng'];
 			$destinations_string = "$wcfmmp_radius_lat,$wcfmmp_radius_lng";
-			$key                 = MBD_GOOGLE_API_KEY;
+			$key                 = MOBILE_BUILDER_GOOGLE_API_KEY;
 			$distance_matrix     = mobile_builder_distance_matrix( $origin_string, $destinations_string, $key );
 		}
 
@@ -390,7 +390,7 @@ class Mobile_Builder_Vendor {
 	public function directions( $request ) {
 		$origin      = $request->get_param( 'origin' );
 		$destination = $request->get_param( 'destination' );
-		$key         = MBD_GOOGLE_API_KEY;
+		$key         = MOBILE_BUILDER_GOOGLE_API_KEY;
 
 		$url = "$this->google_map_api/directions/json?origin=$origin&destination=$destination&key=$key";
 

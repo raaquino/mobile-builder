@@ -116,7 +116,7 @@ class Mobile_Builder_Product {
 
 			$origin_string       = implode( '|', $origins );
 			$destinations_string = "$lat,$lng";
-			$key                 = MBD_GOOGLE_API_KEY;
+			$key                 = MOBILE_BUILDER_GOOGLE_API_KEY;
 
 			$distance_matrix = mobile_builder_distance_matrix( $origin_string, $destinations_string, $key );
 
