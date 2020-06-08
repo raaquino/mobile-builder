@@ -59,68 +59,68 @@ class Mobile_Builder_Cart {
 
 		register_rest_route( $this->namespace, 'cart', array(
 			array(
-				'methods'  => WP_REST_Server::READABLE,
-				'callback' => array( $this, 'get_cart' ),
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_cart' ),
 				'permission_callback' => array( $this, 'user_permissions_check' ),
 			),
 			array(
-				'methods'  => WP_REST_Server::CREATABLE,
-				'callback' => array( $this, 'add_to_cart' ),
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'add_to_cart' ),
 				'permission_callback' => array( $this, 'user_permissions_check' ),
 			)
 		) );
 
 		register_rest_route( $this->namespace, 'update-shipping', array(
-			'methods'  => WP_REST_Server::CREATABLE,
-			'callback' => array( $this, 'update_shipping' ),
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'update_shipping' ),
 			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'update-order-review', array(
-			'methods'  => WP_REST_Server::CREATABLE,
-			'callback' => array( $this, 'mobile_builder_update_order_review' ),
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'mobile_builder_update_order_review' ),
 			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'checkout', array(
-			'methods'  => WP_REST_Server::CREATABLE,
-			'callback' => array( $this, 'checkout' ),
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'checkout' ),
 			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'cart-total', array(
-			'methods'  => WP_REST_Server::READABLE,
-			'callback' => array( $this, 'get_total' ),
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'get_total' ),
 			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'shipping-methods', array(
-			'methods'  => WP_REST_Server::READABLE,
-			'callback' => array( $this, 'shipping_methods' ),
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'shipping_methods' ),
 			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'set-quantity', array(
-			'methods'  => WP_REST_Server::CREATABLE,
-			'callback' => array( $this, 'set_quantity' ),
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'set_quantity' ),
 			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'remove-cart-item', array(
-			'methods'  => WP_REST_Server::CREATABLE,
-			'callback' => array( $this, 'remove_cart_item' ),
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'remove_cart_item' ),
 			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'add-discount', array(
-			'methods'  => WP_REST_Server::CREATABLE,
-			'callback' => array( $this, 'add_discount' ),
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'add_discount' ),
 			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
 		register_rest_route( $this->namespace, 'remove-coupon', array(
-			'methods'  => WP_REST_Server::CREATABLE,
-			'callback' => array( $this, 'remove_coupon' ),
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'remove_coupon' ),
 			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
@@ -641,10 +641,16 @@ class Mobile_Builder_Cart {
 	 *
 	 * @param $request
 	 *
-	 * @since 1.0.0
 	 * @return bool
+	 * @since 1.0.0
 	 */
 	public function user_permissions_check( $request ) {
-		return is_user_logged_in();
+		$isLogin = is_user_logged_in();
+
+		if ( ! $isLogin ) {
+			return new WP_Error( 'mobile_builder_can_not_add_to_cart', __( 'Sorry, you need login to add to cart.', 'mobile_builder' ) );
+		}
+
+		return true;
 	}
 }
