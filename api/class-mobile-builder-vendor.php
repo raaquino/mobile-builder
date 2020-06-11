@@ -86,6 +86,11 @@ class Mobile_Builder_Vendor {
 			'callback' => array( $this, 'vendor' ),
 		) );
 
+		register_rest_route( $namespace, 'delivery-boy-delivery-stat', array(
+			'methods'  => WP_REST_Server::READABLE,
+			'callback' => array( $this, 'delivery_boy_delivery_stat' ),
+		) );
+
 	}
 
 	/**
@@ -395,5 +400,71 @@ class Mobile_Builder_Vendor {
 		$url = "$this->google_map_api/directions/json?origin=$origin&destination=$destination&key=$key";
 
 		return json_decode( mobile_builder_request( 'GET', $url ) );
+	}
+
+	/**
+	 *
+	 * Get delivery boy delivery stat
+	 *
+	 * @param $request
+	 *
+	 * @return array
+	 */
+	public function delivery_boy_delivery_stat( $request ) {
+		$delivery_boy_id = $request->get_param( 'delivery_boy_id' );
+
+		return array(
+			"delivered" => function_exists( 'wcfm_get_delivery_boy_delivery_stat' ) ? wcfm_get_delivery_boy_delivery_stat( $delivery_boy_id, 'delivered' ) : 0,
+			"pending"   => function_exists( 'wcfm_get_delivery_boy_delivery_stat' ) ? wcfm_get_delivery_boy_delivery_stat( $delivery_boy_id, 'pending' ) : 0,
+		);
+	}
+
+	/**
+	 *
+	 * Send notification for user
+	 *
+	 * @param $order_id
+	 * @param $order_item_id
+	 * @param $wcfm_tracking_data
+	 * @param $product_id
+	 * @param $wcfm_delivery_boy
+	 * @param $wcfm_messages
+	 */
+	public function delivery_boy_assigned_notification( $order_id, $order_item_id, $wcfm_tracking_data, $product_id, $wcfm_delivery_boy, $wcfm_messages ) {
+		$content = array(
+			"en" => strip_tags( $wcfm_messages )
+		);
+
+		$fields = array(
+			'app_id'   => MOBILE_BUILDER_ONESIGNAL_APP_ID_DELIVERY_APP,
+			'filters'  => array(
+				array(
+					"field"    => "tag",
+					"key"      => "user_id",
+					"relation" => "=",
+					"value"    => $wcfm_delivery_boy
+				)
+			),
+			'data'     => array( "foo" => "bar" ),
+			'contents' => $content
+		);
+
+		$fields = json_encode( $fields );
+
+		$ch = curl_init();
+		curl_setopt( $ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications" );
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
+			'Content-Type: application/json; charset=utf-8',
+			'Authorization: Basic ' . MOBILE_BUILDER_ONESIGNAL_API_KEY_DELIVERY_APP,
+		) );
+
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_HEADER, false );
+		curl_setopt( $ch, CURLOPT_POST, true );
+		curl_setopt( $ch, CURLOPT_POSTFIELDS, $fields );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
+
+		curl_exec( $ch );
+		curl_close( $ch );
 	}
 }
