@@ -468,7 +468,7 @@ class Mobile_Builder_Vendor {
 		);
 
 		$fields = array(
-			'app_id'   => MOBILE_BUILDER_ONESIGNAL_APP_ID_DELIVERY_APP,
+			'app_id'   => MOBILE_BUILDER_ONESIGNAL_APP_ID,
 			'filters'  => array(
 				array(
 					"field"    => "tag",
