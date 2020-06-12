@@ -10,7 +10,7 @@
  * Plugin Name:       Mobile Builder
  * Plugin URI:        https://doc-oreo.rnlab.io
  * Description:       The most advanced drag & drop app builder. Create multi templates and app controls.
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            Rnlab.io
  * Author URI:        https://rnlab.io
  * License:           GPL-2.0+
