@@ -219,6 +219,7 @@ class Mobile_Builder {
 		$this->loader->add_filter( 'posts_clauses', $plugin_api, 'mbd_product_list_by_vendor', 501, 2 );
 		$this->loader->add_filter( 'posts_clauses', $plugin_api, 'mbd_product_distance', 501, 2 );
 		$this->loader->add_action( 'wcfmd_after_delivery_boy_assigned', $plugin_api, 'delivery_boy_assigned_notification', 10, 6 );
+		$this->loader->add_action( 'woocommerce_order_status_changed', $plugin_api, 'notification_order_status_changed', 10, 3 );
 
 	}
 

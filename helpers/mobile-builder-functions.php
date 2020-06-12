@@ -56,8 +56,40 @@ function mobile_builder_request( $method, $url, $data = false ) {
  *
  * @return mixed
  */
-function mobile_builder_distance_matrix($origin_string, $destinations_string, $key, $units = 'metric') {
+function mobile_builder_distance_matrix( $origin_string, $destinations_string, $key, $units = 'metric' ) {
 	$google_map_api = 'https://maps.googleapis.com/maps/api';
-	$url = "$google_map_api/distancematrix/json?units=$units&origins=$origin_string&destinations=$destinations_string&key=$key";
+	$url            = "$google_map_api/distancematrix/json?units=$units&origins=$origin_string&destinations=$destinations_string&key=$key";
+
 	return json_decode( mobile_builder_request( 'GET', $url ) )->rows;
+}
+
+/**
+ *
+ * Send Notification
+ *
+ * @param $fields
+ * @param $api_key
+ *
+ * @return bool|string
+ */
+function mobile_builder_send_notification( $fields, $api_key ) {
+	$fields = json_encode( $fields );
+
+	$ch = curl_init();
+	curl_setopt( $ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications" );
+	curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
+		'Content-Type: application/json; charset=utf-8',
+		'Authorization: Basic ' . $api_key,
+	) );
+
+	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+	curl_setopt( $ch, CURLOPT_HEADER, false );
+	curl_setopt( $ch, CURLOPT_POST, true );
+	curl_setopt( $ch, CURLOPT_POSTFIELDS, $fields );
+	curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
+
+	$result = curl_exec( $ch );
+	curl_close( $ch );
+
+	return $result;
 }

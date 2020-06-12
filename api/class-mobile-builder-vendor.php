@@ -445,26 +445,42 @@ class Mobile_Builder_Vendor {
 					"value"    => $wcfm_delivery_boy
 				)
 			),
-			'data'     => array( "foo" => "bar" ),
+			'data'     => array( "user_id" => $wcfm_delivery_boy ),
 			'contents' => $content
 		);
 
-		$fields = json_encode( $fields );
+		mobile_builder_send_notification( $fields, MOBILE_BUILDER_ONESIGNAL_API_KEY_DELIVERY_APP );
+	}
 
-		$ch = curl_init();
-		curl_setopt( $ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications" );
-		curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
-			'Content-Type: application/json; charset=utf-8',
-			'Authorization: Basic ' . MOBILE_BUILDER_ONESIGNAL_API_KEY_DELIVERY_APP,
-		) );
+	/**
+	 * Send a Notification event when an order status is changed.
+	 *
+	 * @param int $id Order id.
+	 * @param string $previous_status the old WooCommerce order status.
+	 * @param string $next_status the new WooCommerce order status.
+	 */
+	public function notification_order_status_changed( $id, $previous_status, $next_status ) {
 
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-		curl_setopt( $ch, CURLOPT_HEADER, false );
-		curl_setopt( $ch, CURLOPT_POST, true );
-		curl_setopt( $ch, CURLOPT_POSTFIELDS, $fields );
-		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
+		$order = wc_get_order( $id );
 
-		curl_exec( $ch );
-		curl_close( $ch );
+		$content = array(
+			"en" => sprintf( __( 'Order %s changed to %s' ), $order->get_order_number(), $next_status ),
+		);
+
+		$fields = array(
+			'app_id'   => MOBILE_BUILDER_ONESIGNAL_APP_ID_DELIVERY_APP,
+			'filters'  => array(
+				array(
+					"field"    => "tag",
+					"key"      => "user_id",
+					"relation" => "=",
+					"value"    => $order->get_user_id(),
+				)
+			),
+			'data'     => array( "user_id" => $order->get_user_id() ),
+			'contents' => $content
+		);
+
+		mobile_builder_send_notification( $fields, MOBILE_BUILDER_ONESIGNAL_API_KEY );
 	}
 }
