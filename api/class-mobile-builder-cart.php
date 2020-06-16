@@ -124,6 +124,21 @@ class Mobile_Builder_Cart {
 			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
+		register_rest_route( $this->namespace, 'auto-login', array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'auto_login' ),
+			'permission_callback' => array( $this, 'user_permissions_check' ),
+		) );
+
+	}
+
+	public function auto_login( $request ) {
+
+		$theme = $request->get_param( 'theme' );
+		$currency = $request->get_param( 'currency' );
+
+		wp_redirect( wc_get_checkout_url() . "?mobile=1&theme=$theme&currency=$currency" );
+		exit;
 	}
 
 	public function simulate_as_not_rest( $is_rest_api_request ) {

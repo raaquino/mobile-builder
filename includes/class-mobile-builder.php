@@ -253,10 +253,10 @@ class Mobile_Builder {
 		$this->loader->add_filter( 'determine_current_user', $plugin_public, 'determine_current_user' );
 
 		/**
-		 * Fillter locate template
+		 * Filter locate template
 		 * @since 1.2.0
 		 */
-		$this->loader->add_filter( 'woocommerce_locate_template', $plugin_public, 'woocommerce_locate_template', 100, 3 );
+//		$this->loader->add_filter( 'woocommerce_locate_template', $plugin_public, 'woocommerce_locate_template', 100, 3 );
 
 		/**
 		 * Fillter add to cart before redirect to checkout page
