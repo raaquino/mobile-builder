@@ -91,6 +91,16 @@ class Mobile_Builder_Vendor {
 			'callback' => array( $this, 'delivery_boy_delivery_stat' ),
 		) );
 
+		register_rest_route( $namespace, 'messages-mark-read', array(
+			'methods'  => WP_REST_Server::CREATABLE,
+			'callback' => array( $this, 'messages_mark_read' ),
+		) );
+
+		register_rest_route( $namespace, 'messages-delete', array(
+			'methods'  => WP_REST_Server::CREATABLE,
+			'callback' => array( $this, 'messages_delete' ),
+		) );
+
 	}
 
 	/**
@@ -483,4 +493,56 @@ class Mobile_Builder_Vendor {
 
 		mobile_builder_send_notification( $fields, MOBILE_BUILDER_ONESIGNAL_API_KEY );
 	}
+
+	/**
+	 * Handle Message mark as Read
+	 *
+	 * @since 1.0.2
+	 */
+	function messages_mark_read( $request ) {
+		global $WCFM, $wpdb, $_POST;
+
+		$messageid  = absint( $request->get_param( 'message_id' ) );
+		$message_to = get_current_user_id();
+		$todate     = date( 'Y-m-d H:i:s' );
+
+		$wcfm_read_message = "INSERT into {$wpdb->prefix}wcfm_messages_modifier 
+																(`message`, `is_read`, `read_by`, `read_on`)
+																VALUES
+																({$messageid}, 1, {$message_to}, '{$todate}')";
+		$result            = $wpdb->query( $wcfm_read_message );
+
+		if ( wcfm_is_vendor() || ( function_exists( 'wcfm_is_delivery_boy' ) && wcfm_is_delivery_boy() ) || ( function_exists( 'wcfm_is_affiliate' ) && wcfm_is_affiliate() ) ) {
+			$cache_key = $this->cache_group . '-message-' . $message_to;
+		} else {
+			$cache_key = $this->cache_group . '-message-0';
+		}
+		delete_transient( $cache_key );
+
+		return $result;
+	}
+
+	/**
+	 * Handle delete message
+	 *
+	 * @since 1.0.2
+	 */
+	function messages_delete( $request ) {
+		global $WCFM, $wpdb, $_POST;
+
+		$messageid = absint( $request->get_param( 'message_id' ) );
+		$result    = $wpdb->query( "DELETE FROM {$wpdb->prefix}wcfm_messages WHERE `ID` = {$messageid}" );
+		$result2   = $wpdb->query( "DELETE FROM {$wpdb->prefix}wcfm_messages_modifier WHERE `message` = {$messageid}" );
+
+		if ( wcfm_is_vendor() || ( function_exists( 'wcfm_is_delivery_boy' ) && wcfm_is_delivery_boy() ) || ( function_exists( 'wcfm_is_affiliate' ) && wcfm_is_affiliate() ) ) {
+			$message_to = apply_filters( 'wcfm_message_author', get_current_user_id() );
+			$cache_key  = $this->cache_group . '-message-' . $message_to;
+		} else {
+			$cache_key = $this->cache_group . '-message-0';
+		}
+		delete_transient( $cache_key );
+
+		return $result;
+	}
+
 }
