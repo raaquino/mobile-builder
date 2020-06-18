@@ -101,6 +101,11 @@ class Mobile_Builder_Vendor {
 			'callback' => array( $this, 'messages_delete' ),
 		) );
 
+		register_rest_route( $namespace, 'mark-order-delivered', array(
+			'methods'  => WP_REST_Server::CREATABLE,
+			'callback' => array( $this, 'mark_order_delivered' ),
+		) );
+
 	}
 
 	/**
@@ -545,4 +550,81 @@ class Mobile_Builder_Vendor {
 		return $result;
 	}
 
+	/**
+	 * Handle Message mark order delivered
+	 *
+	 * @since 1.0.2
+	 */
+	public function mark_order_delivered( $request ) {
+		global $WCFM, $WCFMd, $wpdb;
+
+		$delivery_ids = $request->get_param( 'delivery_id' );
+
+		$delivery_ids = explode( ",", $delivery_ids );
+
+		$delivered_not_notified = false;
+
+		if ( $delivery_ids ) {
+			foreach ( $delivery_ids as $delivery_id ) {
+				$sql              = "SELECT * FROM `{$wpdb->prefix}wcfm_delivery_orders`";
+				$sql              .= " WHERE 1=1";
+				$sql              .= " AND ID = {$delivery_id}";
+				$delivery_details = $wpdb->get_results( $sql );
+
+				if ( ! empty( $delivery_details ) ) {
+					foreach ( $delivery_details as $delivery_detail ) {
+
+						// Update Delivery Order Status Update
+						$wpdb->update( "{$wpdb->prefix}wcfm_delivery_orders", array(
+							'delivery_status' => 'delivered',
+							'delivery_date'   => date( 'Y-m-d H:i:s', current_time( 'timestamp', 0 ) )
+						), array( 'ID' => $delivery_id ), array( '%s', '%s' ), array( '%d' ) );
+
+						$order                  = wc_get_order( $delivery_detail->order_id );
+						$wcfm_delivery_boy_user = get_userdata( $delivery_detail->delivery_boy );
+
+						if ( apply_filters( 'wcfm_is_show_marketplace_itemwise_orders', true ) ) {
+							// Admin Notification
+							$wcfm_messages = sprintf( __( 'Order <b>%s</b> item <b>%s</b> delivered by <b>%s</b>.', 'wc-frontend-manager-delivery' ), '#<a class="wcfm_dashboard_item_title" target="_blank" href="' . get_wcfm_view_order_url( $delivery_detail->order_id ) . '">' . $order->get_order_number() . '</a>', get_the_title( $delivery_detail->product_id ), '<a class="wcfm_dashboard_item_title" target="_blank" href="' . get_wcfm_delivery_boys_stats_url( $delivery_detail->delivery_boy ) . '">' . $wcfm_delivery_boy_user->first_name . ' ' . $wcfm_delivery_boy_user->last_name . '</a>' );
+							$WCFM->wcfm_notification->wcfm_send_direct_message( - 2, 0, 0, 0, $wcfm_messages, 'delivery_complete' );
+
+							// Vendor Notification
+							if ( $delivery_detail->vendor_id ) {
+								$WCFM->wcfm_notification->wcfm_send_direct_message( - 1, $delivery_detail->vendor_id, 1, 0, $wcfm_messages, 'delivery_complete' );
+							}
+
+							// Order Note
+							$wcfm_messages = sprintf( __( 'Order <b>%s</b> item <b>%s</b> delivered by <b>%s</b>.', 'wc-frontend-manager-delivery' ), '#<span class="wcfm_dashboard_item_title">' . $order->get_order_number() . '</span>', get_the_title( $delivery_detail->product_id ), $wcfm_delivery_boy_user->first_name . ' ' . $wcfm_delivery_boy_user->last_name );
+							$comment_id    = $order->add_order_note( $wcfm_messages, apply_filters( 'wcfm_is_allow_delivery_note_to_customer', '1' ) );
+						} elseif ( ! $delivered_not_notified ) {
+							// Admin Notification
+							$wcfm_messages = sprintf( __( 'Order <b>%s</b> delivered by <b>%s</b>.', 'wc-frontend-manager-delivery' ), '#<a class="wcfm_dashboard_item_title" target="_blank" href="' . get_wcfm_view_order_url( $delivery_detail->order_id ) . '">' . $order->get_order_number() . '</a>', '<a class="wcfm_dashboard_item_title" target="_blank" href="' . get_wcfm_delivery_boys_stats_url( $delivery_detail->delivery_boy ) . '">' . $wcfm_delivery_boy_user->first_name . ' ' . $wcfm_delivery_boy_user->last_name . '</a>' );
+							$WCFM->wcfm_notification->wcfm_send_direct_message( - 2, 0, 0, 0, $wcfm_messages, 'delivery_complete' );
+
+							// Vendor Notification
+							if ( $delivery_detail->vendor_id ) {
+								$WCFM->wcfm_notification->wcfm_send_direct_message( - 1, $delivery_detail->vendor_id, 1, 0, $wcfm_messages, 'delivery_complete' );
+							}
+
+							// Order Note
+							$wcfm_messages = sprintf( __( 'Order <b>%s</b> delivered by <b>%s</b>.', 'wc-frontend-manager-delivery' ), '#<span class="wcfm_dashboard_item_title">' . $order->get_order_number() . '</span>', $wcfm_delivery_boy_user->first_name . ' ' . $wcfm_delivery_boy_user->last_name );
+							$comment_id    = $order->add_order_note( $wcfm_messages, apply_filters( 'wcfm_is_allow_delivery_note_to_customer', '1' ) );
+
+							$delivered_not_notified = true;
+						}
+					}
+
+					//if( defined('WCFM_REST_API_CALL') ) {
+					//return '{"status": true, "message": "' . __( 'Delivery status updated.', 'wc-frontend-manager-delivery' ) . '"}';
+					//}
+				}
+			}
+		}
+
+		return array(
+			"status"  => true,
+			"message" => __( 'Delivery status updated.', 'wc-frontend-manager-delivery' )
+		);
+
+	}
 }
