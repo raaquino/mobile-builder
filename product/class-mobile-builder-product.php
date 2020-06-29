@@ -226,14 +226,22 @@ class Mobile_Builder_Product {
 //		echo $request->get_param('lng');
 //		echo $request->get_param('lat'); die;
 
-		global $woocommerce_wpml;
+		$type  = $response->data['type'];
 
+		if( $type == 'variable' ){
+			$price_min = $object->get_variation_price();
+			$price_max = $object->get_variation_price('max');
+			$response->data['price_min'] = $price_min;
+			$response->data['price_max'] = $price_max;
+		}
+
+		global $woocommerce_wpml;
 		if ( ! empty( $woocommerce_wpml->multi_currency ) && ! empty( $woocommerce_wpml->settings['currencies_order'] ) ) {
 
-			$type  = $response->data['type'];
 			$price = $response->data['price'];
 
 			if ( $type == 'grouped' || $type == 'variable' ) {
+				
 				foreach ( $woocommerce_wpml->settings['currencies_order'] as $currency ) {
 
 					if ( $currency != get_option( 'woocommerce_currency' ) ) {
