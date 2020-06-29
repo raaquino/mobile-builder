@@ -93,3 +93,26 @@ function mobile_builder_send_notification( $fields, $api_key ) {
 
 	return $result;
 }
+
+/**
+ * Get request headers
+ * @return array|false
+ */
+function mobile_builder_headers() {
+	if ( function_exists( 'apache_request_headers' ) ) {
+		return apache_request_headers();
+	} else {
+
+		foreach ( $_SERVER as $key => $value ) {
+			if ( substr( $key, 0, 5 ) == "HTTP_" ) {
+				$key         = str_replace( " ", "-",
+					ucwords( strtolower( str_replace( "_", " ", substr( $key, 5 ) ) ) ) );
+				$out[ $key ] = $value;
+			} else {
+				$out[ $key ] = $value;
+			}
+		}
+
+		return $out;
+	}
+}

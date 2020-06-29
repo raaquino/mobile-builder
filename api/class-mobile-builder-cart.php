@@ -130,6 +130,21 @@ class Mobile_Builder_Cart {
 			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
+		register_rest_route( $this->namespace, 'check-auth-header', array(
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'check_auth_header' ),
+		) );
+
+	}
+
+	public function check_auth_header( $request ) {
+		$headers = mobile_builder_headers();
+
+		if ( isset( $headers['Authorization'] ) && $headers['Authorization'] == "Bearer test" ) {
+			return array("check" => true);
+		}
+
+		return array("check" => false);
 	}
 
 	public function auto_login( $request ) {
