@@ -130,21 +130,37 @@ class Mobile_Builder_Cart {
 			'permission_callback' => array( $this, 'user_permissions_check' ),
 		) );
 
-		register_rest_route( $this->namespace, 'check-auth-header', array(
+		register_rest_route( $this->namespace, 'analytic', array(
 			'methods'             => WP_REST_Server::CREATABLE,
-			'callback'            => array( $this, 'check_auth_header' ),
+			'callback'            => array( $this, 'analytic' ),
 		) );
 
 	}
 
-	public function check_auth_header( $request ) {
+	public function analytic( $request ) {
 		$headers = mobile_builder_headers();
 
+		$data = array(
+			"authStatus" => false,
+			"WooCommerce" => false,
+			"wcfm" => class_exists( 'WCFM' ),
+			"jwtAuthKey" => defined('MOBILE_BUILDER_JWT_SECRET_KEY'),
+			"googleMapApiKey" => defined('MOBILE_BUILDER_GOOGLE_API_KEY'),
+			"facebookAppId" => defined('MOBILE_BUILDER_FB_APP_ID'),
+			"facebookAppSecret" => defined('MOBILE_BUILDER_FB_APP_SECRET'),
+			"oneSignalId" => defined('MOBILE_BUILDER_ONESIGNAL_APP_ID'),
+			"oneSignalApiKey" => defined('MOBILE_BUILDER_ONESIGNAL_API_KEY'),
+		);
+
 		if ( isset( $headers['Authorization'] ) && $headers['Authorization'] == "Bearer test" ) {
-			return array("check" => true);
+			$data['authStatus'] = true;
 		}
 
-		return array("check" => false);
+		if ( class_exists( 'WooCommerce' ) ) {
+			$data['WooCommerce'] = true;
+		}
+
+		return $data;
 	}
 
 	public function auto_login( $request ) {
