@@ -1647,6 +1647,10 @@ class Mobile_Builder_Public {
 
 			$headers = $this->headers();
 
+			if ( isset( $headers['authorization'] ) ) {
+				$headers['Authorization'] = $headers['authorization'];
+			}
+
 			if ( ! isset( $headers['Authorization'] ) ) {
 				return new WP_Error(
 					'no_auth_header',
@@ -1656,7 +1660,6 @@ class Mobile_Builder_Public {
 					)
 				);
 			}
-
 
 			$match = preg_match( '/Bearer\s(\S+)/', $headers['Authorization'], $matches );
 
