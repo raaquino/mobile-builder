@@ -123,7 +123,7 @@ class Mobile_Builder_Product {
 			// map distance matrix to product
 			$data = [];
 			foreach ( $response->data as $key => $item ) {
-				$index                   = array_search( $item['id'], array_column($gmw_locations, 'object_id') );
+				$index                   = array_search( $item['id'], array_column( $gmw_locations, 'object_id' ) );
 				$item['distance_matrix'] = $distance_matrix[ $index ];
 				$data[]                  = $item;
 			}
@@ -207,7 +207,7 @@ class Mobile_Builder_Product {
 
 		return new WP_Error(
 			"product_id",
-			__("Product ID not provider.", "mobile-builder"),
+			__( "Product ID not provider.", "mobile-builder" ),
 			array(
 				'status' => 403,
 			)
@@ -226,11 +226,11 @@ class Mobile_Builder_Product {
 //		echo $request->get_param('lng');
 //		echo $request->get_param('lat'); die;
 
-		$type  = $response->data['type'];
+		$type = $response->data['type'];
 
-		if( $type == 'variable' ){
-			$price_min = $object->get_variation_price();
-			$price_max = $object->get_variation_price('max');
+		if ( $type == 'variable' ) {
+			$price_min                   = $object->get_variation_price();
+			$price_max                   = $object->get_variation_price( 'max' );
 			$response->data['price_min'] = $price_min;
 			$response->data['price_max'] = $price_max;
 		}
@@ -241,7 +241,7 @@ class Mobile_Builder_Product {
 			$price = $response->data['price'];
 
 			if ( $type == 'grouped' || $type == 'variable' ) {
-				
+
 				foreach ( $woocommerce_wpml->settings['currencies_order'] as $currency ) {
 
 					if ( $currency != get_option( 'woocommerce_currency' ) ) {

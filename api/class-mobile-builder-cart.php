@@ -131,8 +131,8 @@ class Mobile_Builder_Cart {
 		) );
 
 		register_rest_route( $this->namespace, 'analytic', array(
-			'methods'             => WP_REST_Server::CREATABLE,
-			'callback'            => array( $this, 'analytic' ),
+			'methods'  => WP_REST_Server::CREATABLE,
+			'callback' => array( $this, 'analytic' ),
 		) );
 
 	}
@@ -141,15 +141,15 @@ class Mobile_Builder_Cart {
 		$headers = mobile_builder_headers();
 
 		$data = array(
-			"authStatus" => false,
-			"WooCommerce" => false,
-			"wcfm" => class_exists( 'WCFM' ),
-			"jwtAuthKey" => defined('MOBILE_BUILDER_JWT_SECRET_KEY'),
-			"googleMapApiKey" => defined('MOBILE_BUILDER_GOOGLE_API_KEY'),
-			"facebookAppId" => defined('MOBILE_BUILDER_FB_APP_ID'),
-			"facebookAppSecret" => defined('MOBILE_BUILDER_FB_APP_SECRET'),
-			"oneSignalId" => defined('MOBILE_BUILDER_ONESIGNAL_APP_ID'),
-			"oneSignalApiKey" => defined('MOBILE_BUILDER_ONESIGNAL_API_KEY'),
+			"authStatus"        => false,
+			"WooCommerce"       => false,
+			"wcfm"              => class_exists( 'WCFM' ),
+			"jwtAuthKey"        => defined( 'MOBILE_BUILDER_JWT_SECRET_KEY' ),
+			"googleMapApiKey"   => defined( 'MOBILE_BUILDER_GOOGLE_API_KEY' ),
+			"facebookAppId"     => defined( 'MOBILE_BUILDER_FB_APP_ID' ),
+			"facebookAppSecret" => defined( 'MOBILE_BUILDER_FB_APP_SECRET' ),
+			"oneSignalId"       => defined( 'MOBILE_BUILDER_ONESIGNAL_APP_ID' ),
+			"oneSignalApiKey"   => defined( 'MOBILE_BUILDER_ONESIGNAL_API_KEY' ),
 		);
 
 		if ( isset( $headers['Authorization'] ) && $headers['Authorization'] == "Bearer test" ) {
@@ -165,7 +165,7 @@ class Mobile_Builder_Cart {
 
 	public function auto_login( $request ) {
 
-		$theme = $request->get_param( 'theme' );
+		$theme    = $request->get_param( 'theme' );
 		$currency = $request->get_param( 'currency' );
 
 		wp_redirect( wc_get_checkout_url() . "?mobile=1&theme=$theme&currency=$currency" );
@@ -302,7 +302,7 @@ class Mobile_Builder_Cart {
 			$cart_item_key = WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation, $cart_item_data );
 
 			if ( ! $cart_item_key ) {
-				return new WP_Error( 'add_to_cart', __("Can't add product item to cart.", "mobile-builder"), array(
+				return new WP_Error( 'add_to_cart', __( "Can't add product item to cart.", "mobile-builder" ), array(
 					'status' => 403,
 				) );
 			}
@@ -361,7 +361,7 @@ class Mobile_Builder_Cart {
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
 		if ( WC()->cart->is_empty() && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_update_order_review_expired', true ) ) {
-			return new WP_Error( 404, __('Sorry, your session has expired.', "mobile-builder") );
+			return new WP_Error( 404, __( 'Sorry, your session has expired.', "mobile-builder" ) );
 		}
 
 //		do_action( 'woocommerce_checkout_update_order_review', $request->get_param( 'post_data') ) ? wp_unslash( $request->get_param( 'post_data') ) : '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -555,14 +555,14 @@ class Mobile_Builder_Cart {
 		if ( ! $cart_item_key ) {
 			return new WP_Error(
 				'set_quantity_error',
-				__('Cart item key not exist.', "mobile-builder")
+				__( 'Cart item key not exist.', "mobile-builder" )
 			);
 		}
 
 		if ( 0 === $quantity || $quantity < 0 ) {
 			return new WP_Error(
 				'set_quantity_error',
-				__('The quantity not validate', "mobile-builder")
+				__( 'The quantity not validate', "mobile-builder" )
 			);
 		}
 
@@ -594,7 +594,7 @@ class Mobile_Builder_Cart {
 		if ( ! $cart_item_key ) {
 			return new WP_Error(
 				'remove_cart_item',
-				__('Cart item key not exist.', "mobile-builder")
+				__( 'Cart item key not exist.', "mobile-builder" )
 			);
 		}
 
@@ -628,7 +628,7 @@ class Mobile_Builder_Cart {
 		if ( ! $coupon_code ) {
 			return new WP_Error(
 				'add_discount',
-				__('Coupon not exist.', "mobile-builder")
+				__( 'Coupon not exist.', "mobile-builder" )
 			);
 		}
 
@@ -661,7 +661,7 @@ class Mobile_Builder_Cart {
 		if ( ! $coupon_code ) {
 			return new WP_Error(
 				'remove_coupon',
-				__('Coupon not exist.', "mobile-builder")
+				__( 'Coupon not exist.', "mobile-builder" )
 			);
 		}
 
