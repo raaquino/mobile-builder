@@ -293,23 +293,23 @@ class Mobile_Builder_Public {
 		if ( $type == "register" ) {
 			if ( count( $users ) > 0 ) {
 				$error = new WP_Error();
-				$error->add( 403, "Your phone number already exist in database!", array( 'status' => 400 ) );
+				$error->add( 403, __("Your phone number already exist in database!", "mobile-builder"), array( 'status' => 400 ) );
 
 				return $error;
 			}
 
-			return new WP_REST_Response( array( "data" => "Phone number not exits!" ), 200 );
+			return new WP_REST_Response( array( "data" => __("Phone number not exits!","mobile-builder") ), 200 );
 		}
 
 		// Login folow
 		if ( count( $users ) == 0 ) {
 			$error = new WP_Error();
-			$error->add( 403, "Your phone number not exist in database!", array( 'status' => 400 ) );
+			$error->add( 403, __("Your phone number not exist in database!", "mobile-builder"), array( 'status' => 400 ) );
 
 			return $error;
 		}
 
-		return new WP_REST_Response( array( "data" => "Phone number number exist!" ), 200 );
+		return new WP_REST_Response( array( "data" => __("Phone number number exist!", "mobile-builder") ), 200 );
 	}
 
 	/**
@@ -330,7 +330,7 @@ class Mobile_Builder_Public {
 		} else {
 			wp_send_json_error( new WP_Error(
 				404,
-				'Something wrong!.',
+				__('Something wrong!.', "mobile-builder"),
 				array(
 					'status' => 403,
 				)
@@ -437,25 +437,25 @@ class Mobile_Builder_Public {
 
 		// Perform Pre Checks
 		if ( ! class_exists( 'WooCommerce' ) ) {
-			$error->add( 400, __( "Failed to process payment. WooCommerce either missing or deactivated.", 'rnlab-rest-payment' ), array( 'status' => 400 ) );
+			$error->add( 400, __( "Failed to process payment. WooCommerce either missing or deactivated.", 'mobile-builder' ), array( 'status' => 400 ) );
 
 			return $error;
 		}
 		if ( empty( $order_id ) ) {
-			$error->add( 401, __( "Order ID 'order_id' is required.", 'rnlab-rest-payment' ), array( 'status' => 400 ) );
+			$error->add( 401, __( "Order ID 'order_id' is required.", 'mobile-builder' ), array( 'status' => 400 ) );
 
 			return $error;
 		} else if ( wc_get_order( $order_id ) == false ) {
-			$error->add( 402, __( "Order ID 'order_id' is invalid. Order does not exist.", 'rnlab-rest-payment' ), array( 'status' => 400 ) );
+			$error->add( 402, __( "Order ID 'order_id' is invalid. Order does not exist.", 'mobile-builder' ), array( 'status' => 400 ) );
 
 			return $error;
 		} else if ( wc_get_order( $order_id )->get_status() !== 'pending' && wc_get_order( $order_id )->get_status() !== 'failed' ) {
-			$error->add( 403, __( "Order status is '" . wc_get_order( $order_id )->get_status() . "', meaning it had already received a successful payment. Duplicate payments to the order is not allowed. The allow status it is either 'pending' or 'failed'. ", 'rnlab-rest-payment' ), array( 'status' => 400 ) );
+			$error->add( 403, __( "Order status is '" . wc_get_order( $order_id )->get_status() . "', meaning it had already received a successful payment. Duplicate payments to the order is not allowed. The allow status it is either 'pending' or 'failed'. ", 'mobile-builder' ), array( 'status' => 400 ) );
 
 			return $error;
 		}
 		if ( empty( $payment_method ) ) {
-			$error->add( 404, __( "Payment Method 'payment_method' is required.", 'rnlab-rest-payment' ), array( 'status' => 400 ) );
+			$error->add( 404, __( "Payment Method 'payment_method' is required.", 'mobile-builder' ), array( 'status' => 400 ) );
 
 			return $error;
 		}
@@ -469,16 +469,16 @@ class Mobile_Builder_Public {
 			$gateway      = $all_gateways[ $payment_method ];
 
 			if ( empty( $gateway ) ) {
-				$error->add( 405, __( "Failed to process payment. WooCommerce Gateway '" . $payment_method . "' is missing.", 'rnlab-rest-payment' ), array( 'status' => 400 ) );
+				$error->add( 405, __( "Failed to process payment. WooCommerce Gateway '" . $payment_method . "' is missing.", 'mobile-builder' ), array( 'status' => 400 ) );
 
 				return $error;
 			} else {
-				$error->add( 406, __( "Failed to process payment. WooCommerce Gateway '" . $payment_method . "' exists, but is not available.", 'rnlab-rest-payment' ), array( 'status' => 400 ) );
+				$error->add( 406, __( "Failed to process payment. WooCommerce Gateway '" . $payment_method . "' exists, but is not available.", 'mobile-builder' ), array( 'status' => 400 ) );
 
 				return $error;
 			}
 		} else if ( ! has_filter( 'rnlab_pre_process_' . $payment_method . '_payment' ) ) {
-			$error->add( 407, __( "Failed to process payment. WooCommerce Gateway '" . $payment_method . "' exists, but 'REST Payment - " . $payment_method . "' is not available.", 'rnlab-rest-payment' ), array( 'status' => 400 ) );
+			$error->add( 407, __( "Failed to process payment. WooCommerce Gateway '" . $payment_method . "' exists, but 'REST Payment - " . $payment_method . "' is not available.", 'mobile-builder' ), array( 'status' => 400 ) );
 
 			return $error;
 		} else {
@@ -495,16 +495,16 @@ class Mobile_Builder_Public {
 				$payment_result = $gateway->process_payment( $order_id );
 				if ( $payment_result['result'] === "success" ) {
 					$response['code']    = 200;
-					$response['message'] = __( "Payment Successful.", "rnlab-rest-payment" );
+					$response['message'] = __( "Payment Successful.", "mobile-builder" );
 					$response['data']    = $payment_result;
 
 					// Return Successful Response
 					return new WP_REST_Response( $response, 200 );
 				} else {
-					return new WP_Error( 500, 'Payment Failed, Check WooCommerce Status Log for further information.', $payment_result );
+					return new WP_Error( 500, __('Payment Failed, Check WooCommerce Status Log for further information.', "mobile-builder"), $payment_result );
 				}
 			} else {
-				return new WP_Error( 408, 'Payment Failed, Pre Process Failed.', $parameters['pre_process_result'] );
+				return new WP_Error( 408, __('Payment Failed, Pre Process Failed.', "mobile-builder"), $parameters['pre_process_result'] );
 			}
 
 		}
@@ -525,11 +525,11 @@ class Mobile_Builder_Public {
 
 		if ( $payment_result['result'] === "success" ) {
 			$response['code']     = 200;
-			$response['message']  = __( "Your Payment was Successful", "rnlab-rest-payment" );
+			$response['message']  = __( "Your Payment was Successful", "mobile-builder" );
 			$response['redirect'] = $payment_result['redirect'];
 		} else {
 			$response['code']    = 401;
-			$response['message'] = __( "Please enter valid card details", "rnlab-rest-payment" );
+			$response['message'] = __( "Please enter valid card details", "mobile-builder" );
 		}
 
 		return new WP_REST_Response( $response );
@@ -544,18 +544,18 @@ class Mobile_Builder_Public {
 		$error = new WP_Error();
 
 		if ( empty( $order_id ) ) {
-			$error->add( 401, __( "Order ID 'order_id' is required.", 'rnlab-rest-payment' ), array( 'status' => 400 ) );
+			$error->add( 401, __( "Order ID 'order_id' is required.", 'mobile-builder' ), array( 'status' => 400 ) );
 
 			return $error;
 		} else if ( wc_get_order( $order_id ) == false ) {
-			$error->add( 402, __( "Order ID 'order_id' is invalid. Order does not exist.", 'rnlab-rest-payment' ),
+			$error->add( 402, __( "Order ID 'order_id' is invalid. Order does not exist.", 'mobile-builder' ),
 				array( 'status' => 400 ) );
 
 			return $error;
 		}
 
 		if ( empty( $stripe_source ) ) {
-			$error->add( 404, __( "Payment source 'stripe_source' is required.", 'rnlab-rest-payment' ),
+			$error->add( 404, __( "Payment source 'stripe_source' is required.", 'mobile-builder' ),
 				array( 'status' => 400 ) );
 
 			return $error;
@@ -576,7 +576,7 @@ class Mobile_Builder_Public {
 
 		if ( $payment_result['result'] === "success" ) {
 			$response['code']    = 200;
-			$response['message'] = __( "Your Payment was Successful", "rnlab-rest-payment" );
+			$response['message'] = __( "Your Payment was Successful", "mobile-builder" );
 
 			// $order = wc_get_order( $order_id );
 
@@ -587,7 +587,7 @@ class Mobile_Builder_Public {
 
 		} else {
 			$response['code']    = 401;
-			$response['message'] = __( "Please enter valid card details", "rnlab-rest-payment" );
+			$response['message'] = __( "Please enter valid card details", "mobile-builder" );
 		}
 
 		return new WP_REST_Response( $response );
@@ -642,7 +642,7 @@ class Mobile_Builder_Public {
 		if ( ! $current_user->exists() ) {
 			return new WP_Error(
 				'user_not_login',
-				'Please login first.',
+				__('Please login first.', "mobile-builder"),
 				array(
 					'status' => 403,
 				)
@@ -690,7 +690,7 @@ class Mobile_Builder_Public {
 		if ( ! $current_user->exists() ) {
 			return new WP_Error(
 				'user_not_login',
-				'Please login first.',
+				__('Please login first.', "mobile-builder"),
 				array(
 					'status' => 403,
 				)
@@ -770,7 +770,7 @@ class Mobile_Builder_Public {
 		} catch ( Exception $e ) {
 			return new WP_Error(
 				'error_setting',
-				'Some thing wrong.',
+				__('Some thing wrong.', "mobile-builder"),
 				array(
 					'status' => 403,
 				)
@@ -798,7 +798,7 @@ class Mobile_Builder_Public {
 		} else {
 			return new WP_Error(
 				'create_token_error',
-				'You did not create user wp_auth_user',
+				__('You did not create user wp_auth_user', "mobile-builder"),
 				array(
 					'status' => 403,
 				)
@@ -819,12 +819,12 @@ class Mobile_Builder_Public {
 		$user_login = $request->get_param( 'user_login' );
 
 		if ( empty( $user_login ) || ! is_string( $user_login ) ) {
-			$errors->add( 'empty_username', __( '<strong>ERROR</strong>: Enter a username or email address.' ) );
+			$errors->add( 'empty_username', __( '<strong>ERROR</strong>: Enter a username or email address.' , "mobile-builder") );
 		} elseif ( strpos( $user_login, '@' ) ) {
 			$user_data = get_user_by( 'email', trim( wp_unslash( $user_login ) ) );
 			if ( empty( $user_data ) ) {
 				$errors->add( 'invalid_email',
-					__( '<strong>ERROR</strong>: There is no account with that username or email address.' ) );
+					__( '<strong>ERROR</strong>: There is no account with that username or email address.' , "mobile-builder") );
 			}
 		} else {
 			$login     = trim( $user_login );
@@ -837,7 +837,7 @@ class Mobile_Builder_Public {
 
 		if ( ! $user_data ) {
 			$errors->add( 'invalidcombo',
-				__( '<strong>ERROR</strong>: There is no account with that username or email address.' ) );
+				__( '<strong>ERROR</strong>: There is no account with that username or email address.' , "mobile-builder") );
 
 			return $errors;
 		}
@@ -861,18 +861,18 @@ class Mobile_Builder_Public {
 			$site_name = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 		}
 
-		$message = __( 'Someone has requested a password reset for the following account:' ) . "\r\n\r\n";
+		$message = __( 'Someone has requested a password reset for the following account:' , "mobile-builder") . "\r\n\r\n";
 		/* translators: %s: site name */
-		$message .= sprintf( __( 'Site Name: %s' ), $site_name ) . "\r\n\r\n";
+		$message .= sprintf( __( 'Site Name: %s' , "mobile-builder"), $site_name ) . "\r\n\r\n";
 		/* translators: %s: user login */
-		$message .= sprintf( __( 'Username: %s' ), $user_login ) . "\r\n\r\n";
-		$message .= __( 'If this was a mistake, just ignore this email and nothing will happen.' ) . "\r\n\r\n";
-		$message .= __( 'To reset your password, visit the following address:' ) . "\r\n\r\n";
+		$message .= sprintf( __( 'Username: %s' , "mobile-builder"), $user_login ) . "\r\n\r\n";
+		$message .= __( 'If this was a mistake, just ignore this email and nothing will happen.' , "mobile-builder") . "\r\n\r\n";
+		$message .= __( 'To reset your password, visit the following address:' , "mobile-builder") . "\r\n\r\n";
 		$message .= '<' . network_site_url( "wp-login.php?action=rp&key=$key&login=" . rawurlencode( $user_login ),
 				'login' ) . ">\r\n";
 
 		/* translators: Password reset notification email subject. %s: Site title */
-		$title = sprintf( __( '[%s] Password Reset' ), $site_name );
+		$title = sprintf( __( '[%s] Password Reset' , "mobile-builder"), $site_name );
 
 		/**
 		 * Filters the subject of the password reset email.
@@ -906,7 +906,7 @@ class Mobile_Builder_Public {
 		if ( $message && ! wp_mail( $user_email, wp_specialchars_decode( $title ), $message ) ) {
 			return new WP_Error(
 				'send_email',
-				'Possible reason: your host may have disabled the mail() function.',
+				__('Possible reason: your host may have disabled the mail() function.', "mobile-builder"),
 				array(
 					'status' => 403,
 				)
@@ -945,7 +945,7 @@ class Mobile_Builder_Public {
 		if ( ! is_email( $email ) || email_exists( $email ) ) {
 			return new WP_Error(
 				"email",
-				"Your input email not valid or exist in database.",
+				__("Your input email not valid or exist in database.", "mobile-builder"),
 				array(
 					'status' => 403,
 				)
@@ -956,14 +956,14 @@ class Mobile_Builder_Public {
 		if ( username_exists( $name ) || empty( $name ) ) {
 			return new WP_Error(
 				"name",
-				"Your username exist.",
+				__("Your username exist.", "mobile-builder"),
 				array(
 					'status' => 403,
 				)
 			);
 		}
 
-		return array( "message" => "success!" );
+		return array( "message" => __("success!", "mobile-builder") );
 	}
 
 	/**
@@ -987,7 +987,7 @@ class Mobile_Builder_Public {
 		if ( ! is_email( $email ) || email_exists( $email ) ) {
 			return new WP_Error(
 				"email",
-				"Your input email not valid or exist in database.",
+				__("Your input email not valid or exist in database.", "mobile-builder"),
 				array(
 					'status' => 403,
 				)
@@ -998,7 +998,7 @@ class Mobile_Builder_Public {
 		if ( username_exists( $name ) || empty( $name ) ) {
 			return new WP_Error(
 				"name",
-				"Your username exist.",
+				__("Your username exist.", "mobile-builder"),
 				array(
 					'status' => 403,
 				)
@@ -1009,7 +1009,7 @@ class Mobile_Builder_Public {
 		if ( mb_strlen( $first_name ) < 2 ) {
 			return new WP_Error(
 				"first_name",
-				"First name not valid.",
+				__("First name not valid.", "mobile-builder"),
 				array(
 					'status' => 403,
 				)
@@ -1020,7 +1020,7 @@ class Mobile_Builder_Public {
 		if ( mb_strlen( $last_name ) < 2 ) {
 			return new WP_Error(
 				"last_name",
-				"Last name not valid.",
+				__("Last name not valid.", "mobile-builder"),
 				array(
 					'status' => 403,
 				)
@@ -1031,7 +1031,7 @@ class Mobile_Builder_Public {
 		if ( empty( $password ) ) {
 			return new WP_Error(
 				"password",
-				"Password is required.",
+				__("Password is required.", "mobile-builder"),
 				array(
 					'status' => 403,
 				)
@@ -1072,7 +1072,7 @@ class Mobile_Builder_Public {
 
 				return new WP_Error(
 					'number_not_validate',
-					'Your phone number not validate',
+					__('Your phone number not validate', "mobile-builder"),
 					array(
 						'status' => 403,
 					)
@@ -1091,7 +1091,7 @@ class Mobile_Builder_Public {
 
 				return new WP_Error(
 					'phone_number_exist',
-					"Your phone number already exist in database!",
+					__("Your phone number already exist in database!", "mobile-builder"),
 					array( 'status' => 400 )
 				);
 			}
@@ -1166,7 +1166,7 @@ class Mobile_Builder_Public {
 
 		if ( $result === false ) {
 			$error = new WP_Error();
-			$error->add( 403, "Get Firebase user info error!", array( 'status' => 400 ) );
+			$error->add( 403, __("Get Firebase user info error!", "mobile-builder"), array( 'status' => 400 ) );
 
 			return $error;
 		}
@@ -1176,7 +1176,7 @@ class Mobile_Builder_Public {
 		if ( ! $email ) {
 			return new WP_Error(
 				'email_not_exist',
-				'User not provider email',
+				__('User not provider email', "mobile-builder"),
 				array(
 					'status' => 403,
 				)
@@ -1252,7 +1252,7 @@ class Mobile_Builder_Public {
 			if ( \count( $tks ) != 3 ) {
 				return new WP_Error(
 					'error_login_apple',
-					'Wrong number of segments',
+					__('Wrong number of segments', "mobile-builder"),
 					array(
 						'status' => 403,
 					)
@@ -1264,7 +1264,7 @@ class Mobile_Builder_Public {
 			if ( null === ( $header = JWT::jsonDecode( JWT::urlsafeB64Decode( $headb64 ) ) ) ) {
 				return new WP_Error(
 					'error_login_apple',
-					'Invalid header encoding',
+					__('Invalid header encoding', "mobile-builder"),
 					array(
 						'status' => 403,
 					)
@@ -1274,7 +1274,7 @@ class Mobile_Builder_Public {
 			if ( ! isset( $header->kid ) ) {
 				return new WP_Error(
 					'error_login_apple',
-					'"kid" empty, unable to lookup correct key',
+					__('"kid" empty, unable to lookup correct key', "mobile-builder"),
 					array(
 						'status' => 403,
 					)
@@ -1290,7 +1290,7 @@ class Mobile_Builder_Public {
 			if ( $payload->sub !== $userIdentity ) {
 				return new WP_Error(
 					'validate-user',
-					'User not validate',
+					__('User not validate', "mobile-builder"),
 					array(
 						'status' => 403,
 					)
@@ -1380,11 +1380,11 @@ class Mobile_Builder_Public {
 			$response = $fb->get( '/me?fields=id,first_name,last_name,name,picture,email', $token );
 		} catch ( \Facebook\Exceptions\FacebookResponseException $e ) {
 			// When Graph returns an error
-			echo 'Graph returned an error: ' . $e->getMessage();
+			echo __('Graph returned an error: ', "mobile-builder") . $e->getMessage();
 			exit;
 		} catch ( \Facebook\Exceptions\FacebookSDKException $e ) {
 			// When validation fails or other local issues
-			echo 'Facebook SDK returned an error: ' . $e->getMessage();
+			echo __('Facebook SDK returned an error: ', "mobile-builder") . $e->getMessage();
 			exit;
 		}
 
@@ -1395,7 +1395,7 @@ class Mobile_Builder_Public {
 		if ( ! $email ) {
 			return new WP_Error(
 				'email_not_exist',
-				'User not provider email',
+				__('User not provider email', "mobile-builder"),
 				array(
 					'status' => 403,
 				)
@@ -1510,7 +1510,7 @@ class Mobile_Builder_Public {
 			if ( ! defined( 'MOBILE_BUILDER_FIREBASE_SERVER_KEY' ) ) {
 				return new WP_Error(
 					'not_exist_firebase_server_key',
-					'The MOBILE_BUILDER_FIREBASE_SERVER_KEY not define in wp-config.php',
+					__('The MOBILE_BUILDER_FIREBASE_SERVER_KEY not define in wp-config.php', "mobile-builder"),
 					array(
 						'status' => 403,
 					)
@@ -1537,7 +1537,7 @@ class Mobile_Builder_Public {
 
 			if ( $result === false ) {
 				$error = new WP_Error();
-				$error->add( 403, "Get Firebase user info error!", array( 'status' => 400 ) );
+				$error->add( 403, __("Get Firebase user info error!", "mobile-builder"), array( 'status' => 400 ) );
 
 				return $error;
 			}
@@ -1545,7 +1545,7 @@ class Mobile_Builder_Public {
 			if ( ! isset( $result->users[0]->phoneNumber ) ) {
 				return new WP_Error(
 					'not_exist_firebase_user',
-					'The user not exist.',
+					__('The user not exist.', "mobile-builder"),
 					array(
 						'status' => 403,
 					)
@@ -1562,7 +1562,7 @@ class Mobile_Builder_Public {
 
 			if ( count( $users ) == 0 ) {
 				$error = new WP_Error();
-				$error->add( 403, "Did not find any members matching the phone number!", array( 'status' => 400 ) );
+				$error->add( 403, __("Did not find any members matching the phone number!", "mobile-builder"), array( 'status' => 400 ) );
 
 				return $error;
 			}
@@ -1654,7 +1654,7 @@ class Mobile_Builder_Public {
 			if ( ! isset( $headers['Authorization'] ) ) {
 				return new WP_Error(
 					'no_auth_header',
-					'Authorization header not found.',
+					__('Authorization header not found.', "mobile-builder"),
 					array(
 						'status' => 403,
 					)
@@ -1666,7 +1666,7 @@ class Mobile_Builder_Public {
 			if ( ! $match ) {
 				return new WP_Error(
 					'token_not_validate',
-					'Token not validate format.',
+					__('Token not validate format.', "mobile-builder"),
 					array(
 						'status' => 403,
 					)
@@ -1684,7 +1684,7 @@ class Mobile_Builder_Public {
 			if ( $data->iss != get_bloginfo( 'url' ) ) {
 				return new WP_Error(
 					'bad_iss',
-					'The iss do not match with this server',
+					__('The iss do not match with this server', "mobile-builder"),
 					array(
 						'status' => 403,
 					)
@@ -1693,7 +1693,7 @@ class Mobile_Builder_Public {
 			if ( ! isset( $data->data->user_id ) ) {
 				return new WP_Error(
 					'id_not_found',
-					'User ID not found in the token',
+					__('User ID not found in the token', "mobile-builder"),
 					array(
 						'status' => 403,
 					)
@@ -1833,7 +1833,7 @@ class Mobile_Builder_Public {
 		$id = (int) $request['id'];
 
 		if ( get_current_user_id() != $id ) {
-			return new WP_Error( 'mobile_builder', __( 'Sorry, you cannot change info.', 'rnlab' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'mobile_builder', __( 'Sorry, you cannot change info.', "mobile-builder"), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;

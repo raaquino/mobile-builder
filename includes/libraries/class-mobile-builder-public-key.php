@@ -20,13 +20,13 @@ class Mobile_Builder_Public_Key {
 		$decodedPublicKeys = json_decode( $publicKeys, true );
 
 		if ( ! isset( $decodedPublicKeys['keys'] ) || count( $decodedPublicKeys['keys'] ) < 1 ) {
-			throw new Exception( 'Invalid key format.' );
+			throw new Exception( __('Invalid key format.', "mobile-builder") );
 		}
 
 		$key = array_search( $kid, array_column( $decodedPublicKeys['keys'], 'kid' ) );
 
 		if ( $key === false ) {
-			throw new UnexpectedValueException( '"kid" empty, unable to lookup correct key' );
+			throw new UnexpectedValueException( __('"kid" empty, unable to lookup correct key', "mobile-builder") );
 		}
 
 		$parsedKeyData    = $decodedPublicKeys['keys'][ $key ];
@@ -34,7 +34,7 @@ class Mobile_Builder_Public_Key {
 		$publicKeyDetails = openssl_pkey_get_details( $parsedPublicKey );
 
 		if ( ! isset( $publicKeyDetails['key'] ) ) {
-			throw new Exception( 'Invalid public key details.' );
+			throw new Exception( __('Invalid public key details.', "mobile-builder") );
 		}
 
 		return [
@@ -59,26 +59,26 @@ class Mobile_Builder_Public_Key {
 	 */
 	private static function parseKey( array $jwk ) {
 		if ( empty( $jwk ) ) {
-			throw new InvalidArgumentException( 'JWK must not be empty' );
+			throw new InvalidArgumentException( __('JWK must not be empty', "mobile-builder") );
 		}
 		if ( ! isset( $jwk['kty'] ) ) {
-			throw new UnexpectedValueException( 'JWK must contain a "kty" parameter' );
+			throw new UnexpectedValueException( __('JWK must contain a "kty" parameter', "mobile-builder") );
 		}
 
 		switch ( $jwk['kty'] ) {
 			case 'RSA':
 				if ( \array_key_exists( 'd', $jwk ) ) {
-					throw new UnexpectedValueException( 'RSA private keys are not supported' );
+					throw new UnexpectedValueException( __('RSA private keys are not supported', "mobile-builder") );
 				}
 				if ( ! isset( $jwk['n'] ) || ! isset( $jwk['e'] ) ) {
-					throw new UnexpectedValueException( 'RSA keys must contain values for both "n" and "e"' );
+					throw new UnexpectedValueException( __('RSA keys must contain values for both "n" and "e"', "mobile-builder") );
 				}
 
 				$pem       = self::createPemFromModulusAndExponent( $jwk['n'], $jwk['e'] );
 				$publicKey = \openssl_pkey_get_public( $pem );
 				if ( false === $publicKey ) {
 					throw new DomainException(
-						'OpenSSL error: ' . \openssl_error_string()
+						__('OpenSSL error: ', "mobile-builder") . \openssl_error_string()
 					);
 				}
 

@@ -207,7 +207,7 @@ class Mobile_Builder_Product {
 
 		return new WP_Error(
 			"product_id",
-			"Product ID not provider.",
+			__("Product ID not provider.", "mobile-builder"),
 			array(
 				'status' => 403,
 			)
