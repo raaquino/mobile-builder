@@ -298,16 +298,26 @@ class Mobile_Builder_Cart {
 			$variation_id   = $request->get_param( 'variation_id' );
 			$variation      = $request->get_param( 'variation' );
 			$cart_item_data = $request->get_param( 'cart_item_data' );
+			$passed_validation = false;
 
-			$cart_item_key = WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation, $cart_item_data );
+			$passed_validation = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, $quantity);
 
-			if ( ! $cart_item_key ) {
-				return new WP_Error( 'add_to_cart', __( "Can't add product item to cart.", "mobile-builder" ), array(
-					'status' => 403,
-				) );
+			if($passed_validation){
+
+				$cart_item_key = WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation, $cart_item_data );
+
 			}
 
-			return WC()->cart->get_cart_item( $cart_item_key );
+			if (! $passed_validation || ! $cart_item_key ){
+                //if validation failed or add to cart failed, return response from woocommerce
+                return new WP_Error( 'add_to_cart', htmlspecialchars_decode(strip_tags(wc_print_notices(true))), array(
+                        'status' => 403,
+                ) );
+            }
+            
+
+            return WC()->cart->get_cart_item( $cart_item_key );
+
 		} catch ( \Exception $e ) {
 			//do something when exception is thrown
 			return new WP_Error( 'add_to_cart', $e->getMessage(), array(
